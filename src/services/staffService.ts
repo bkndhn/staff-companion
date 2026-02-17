@@ -144,7 +144,7 @@ export const staffService = {
       id: dbStaff.id,
       name: dbStaff.name,
       location: dbStaff.location,
-      type: dbStaff.type,
+      type: dbStaff.type as Staff['type'],
       experience: dbStaff.experience,
       basicSalary: dbStaff.basic_salary,
       incentive: dbStaff.incentive,

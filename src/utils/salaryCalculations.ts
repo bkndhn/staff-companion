@@ -1,4 +1,4 @@
-import { Staff, Attendance, SalaryDetail, AdvanceDeduction, PartTimeStaff, PartTimeSalaryDetail, WeeklySalary, DailySalary } from '../types';
+import { Staff, Attendance, AdvanceDeduction, PartTimeSalaryDetail, WeeklySalary, DailySalary } from '../types';
 import { settingsService } from '../services/settingsService';
 
 // Round to nearest 10
@@ -192,7 +192,7 @@ export const calculateSalary = (
   currentMonth: number,
   currentYear: number
 ) => {
-  const { totalPresentDays, sundayAbsents, daysInMonth, presentDays, halfDays, leaveDays } = attendanceMetrics;
+  const { totalPresentDays, sundayAbsents, presentDays, halfDays, leaveDays } = attendanceMetrics;
 
   // Get salary calculation days from staff settings (default 26)
   const calculationDays = staff.salaryCalculationDays || 26;

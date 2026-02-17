@@ -9,7 +9,7 @@ interface CacheEntry<T> {
     expiresAt: number;
 }
 
-interface CacheConfig {
+interface _CacheConfig {
     ttl: number; // Time to live in milliseconds
     key: string;
 }

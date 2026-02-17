@@ -38,6 +38,7 @@ export interface DatabaseStaff {
   contact_number?: string;
   address?: string;
   photo_url?: string;
+  initial_salary?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -50,11 +51,14 @@ export interface DatabaseAttendance {
   created_at: string;
   attendance_value?: number;
   is_part_time?: boolean;
+  is_sunday?: boolean;
   staff_name?: string;
   location?: string;
   shift?: string;
   salary?: number;
   salary_override?: boolean;
+  arrival_time?: string;
+  leaving_time?: string;
 }
 
 export interface DatabaseAdvanceDeduction {
@@ -70,6 +74,9 @@ export interface DatabaseAdvanceDeduction {
   created_at: string;
   updated_at: string;
 }
+
+// Alias for backward compat
+export type DatabaseAdvance = DatabaseAdvanceDeduction;
 
 export interface DatabaseOldStaffRecord {
   id: string;

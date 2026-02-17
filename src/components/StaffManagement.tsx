@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Staff, SalaryHike, SalaryCategory } from '../types';
-import { Users, Plus, Edit2, Trash2, Archive, Calendar, TrendingUp, MapPin, DollarSign, Check, X, Search, GripVertical, Filter, Copy, AlertCircle } from 'lucide-react';
+import { Staff, SalaryHike } from '../types';
+import { type SalaryCategory } from '../services/settingsService';
+import { Users, Plus, Edit2, Trash2, Archive, Calendar, TrendingUp, MapPin, DollarSign, Check, X, GripVertical, Filter, Copy, AlertCircle } from 'lucide-react';
 import { calculateExperience } from '../utils/salaryCalculations';
 import SalaryHikeHistory from './SalaryHikeHistory';
 import SalaryHikeDueModal from './SalaryHikeDueModal';

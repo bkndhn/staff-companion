@@ -164,8 +164,8 @@ function App() {
     await loadAllData();
   };
 
-  const handleLogin = (userData: User) => {
-    setUser(userData);
+  const handleLogin = (userData: { email: string; role: string; location?: string }) => {
+    setUser(userData as User);
   };
 
   const handleLogout = () => {
@@ -209,12 +209,8 @@ function App() {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
-    staff.filter(s => s.isActive).forEach(async (member) => {
-      const existingAdvance = advances.find(adv =>
-        adv.staffId === member.id &&
-        adv.month === currentMonth &&
-        adv.year === currentYear
-      );
+    staff.filter(s => s.isActive).forEach(async (_member) => {
+      // Auto-carry forward logic placeholder
     });
   }, [staff, advances, user]);
 
@@ -598,7 +594,7 @@ function App() {
 
       // Also try to delete from staff table if exists (hard delete)
       try {
-        await staffService.permanentDelete(record.staffId || record.id);
+        await staffService.permanentDelete(record.originalStaffId || record.id);
       } catch (e) {
         // Staff may not exist in main table, that's fine
       }
@@ -607,7 +603,7 @@ function App() {
       setOldStaffRecords(prev => prev.filter(r => r.id !== record.id));
 
       // Also remove related attendance if any
-      setAttendance(prev => prev.filter(a => a.staffId !== record.staffId && a.staffId !== record.id));
+      setAttendance(prev => prev.filter(a => a.staffId !== record.originalStaffId && a.staffId !== record.id));
 
       alert(`${record.name} has been permanently deleted.`);
     } catch (error) {

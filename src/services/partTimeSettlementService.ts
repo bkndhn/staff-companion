@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { PartTimeSettlement } from '../types';
+import type { PartTimeSettlement as _PartTimeSettlement } from '../types';
 
 export const partTimeSettlementService = {
     // Get all settlement records (or filter by list of keys for efficiency if needed, but for now simple)
