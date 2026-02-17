@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { OldStaffRecord } from '../types';
-import { Archive, Download, Eye, Search, UserPlus, Trash2 } from 'lucide-react';
+import { Archive, Download, Eye, UserPlus, Trash2 } from 'lucide-react';
 import { exportOldStaffPDF } from '../utils/pdfExport';
 
 interface OldStaffRecordsProps {

@@ -31,7 +31,7 @@ const BulkSalarySender: React.FC<BulkSalarySenderProps> = ({
     const currentDetail = eligibleDetails[currentIndex];
     const currentStaff = currentDetail ? staff.find(s => s.id === currentDetail.staffId) : null;
 
-    const progress = Math.round(((currentIndex) / eligibleDetails.length) * 100);
+    const _progress = Math.round(((currentIndex) / eligibleDetails.length) * 100);
 
     const handleSend = () => {
         if (currentDetail) {
@@ -49,7 +49,7 @@ const BulkSalarySender: React.FC<BulkSalarySenderProps> = ({
         }
     };
 
-    const isComplete = currentIndex >= eligibleDetails.length - 1 && completedIds.has(eligibleDetails[eligibleDetails.length - 1]?.staffId);
+    const _isComplete = currentIndex >= eligibleDetails.length - 1 && completedIds.has(eligibleDetails[eligibleDetails.length - 1]?.staffId);
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">

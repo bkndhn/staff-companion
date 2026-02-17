@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, X, DollarSign } from 'lucide-react';
+import { TrendingUp, X } from 'lucide-react';
 
 interface SalaryHikeModalProps {
   isOpen: boolean;

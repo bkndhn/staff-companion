@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Attendance, PartTimeSalaryDetail, Staff } from '../types';
-import { Clock, Plus, Download, Calendar, DollarSign, Edit2, Save, X, FileSpreadsheet, Trash2, Settings, Search, CheckCircle, RotateCcw } from 'lucide-react';
+import { Clock, Plus, Download, Calendar, DollarSign, Edit2, Save, X, FileSpreadsheet, Trash2, Settings, CheckCircle } from 'lucide-react';
 import { calculatePartTimeSalary, getPartTimeDailySalary, isSunday, getCurrencyBreakdown } from '../utils/salaryCalculations';
-import { exportSalaryToExcel, exportSalaryPDF, exportPartTimeSalaryPDF } from '../utils/exportUtils';
+import { exportSalaryToExcel, exportPartTimeSalaryPDF } from '../utils/exportUtils';
 import { settingsService } from '../services/settingsService';
 import { partTimeAdvanceService } from '../services/partTimeAdvanceService';
 import { partTimeSettlementService } from '../services/partTimeSettlementService';
@@ -92,7 +92,7 @@ const AdvanceInput: React.FC<{
     month: number;
     week: number;
     onSave: (amount: number) => Promise<void>;
-}> = ({ initialValue, staffName, location, year, month, week, onSave }) => {
+}> = ({ initialValue, onSave }) => {
     const [value, setValue] = useState(initialValue.toString());
     const [isSaving, setIsSaving] = useState(false);
 
@@ -111,9 +111,9 @@ const AdvanceInput: React.FC<{
         }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            e.currentTarget.blur();
+            (e.currentTarget as HTMLInputElement).blur();
         }
     };
 
@@ -218,7 +218,7 @@ const PartTimeStaff: React.FC<PartTimeStaffProps> = ({
     const [settledSalaries, setSettledSalaries] = useState<Set<string>>(new Set());
     const [advanceRecords, setAdvanceRecords] = useState<Record<string, PartTimeAdvanceRecord>>({});
     const [aggregatedAdvances, setAggregatedAdvances] = useState<Record<string, number>>({});
-    const [isLoadingAdvances, setIsLoadingAdvances] = useState(false);
+    const [, setIsLoadingAdvances] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState<Set<string>>(new Set());
     const [settlementFilter, setSettlementFilter] = useState<'all' | 'settled' | 'unsettled'>('all');
     const [showSettings, setShowSettings] = useState(false);
@@ -401,13 +401,13 @@ const PartTimeStaff: React.FC<PartTimeStaffProps> = ({
     };
 
     // Simple check for backward compatibility
-    const isSettled = (staffName: string, location: string) => {
+    const _isSettled = (staffName: string, location: string) => {
         const status = getSettlementStatus(staffName, location);
         return status.isFullySettled;
     };
 
     // Check if partially settled (for different highlighting)
-    const isPartiallySettled = (staffName: string, location: string) => {
+    const _isPartiallySettled = (staffName: string, location: string) => {
         const status = getSettlementStatus(staffName, location);
         return status.isPartiallySettled;
     };

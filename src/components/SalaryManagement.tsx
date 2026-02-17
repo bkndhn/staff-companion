@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Staff, Attendance, SalaryDetail, AdvanceDeduction, PartTimeSalaryDetail } from '../types';
-import { DollarSign, Download, Users, Calendar, TrendingUp, Edit2, Save, X, FileSpreadsheet, Search, FileText, MessageCircle } from 'lucide-react';
+import { Staff, Attendance, SalaryDetail, AdvanceDeduction, PartTimeSalaryDetail, SalaryOverride } from '../types';
+import { DollarSign, Download, Users, Calendar, TrendingUp, Edit2, Save, X, FileSpreadsheet, FileText, MessageCircle } from 'lucide-react';
 import { calculateAttendanceMetrics, calculateSalary, calculatePartTimeSalary, roundToNearest10 } from '../utils/salaryCalculations';
 import { exportSalaryToExcel, exportSalaryPDF, generateSalarySlipPDF, exportBulkSalarySlipsPDF } from '../utils/exportUtils';
 import { settingsService } from '../services/settingsService';
@@ -98,7 +98,7 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
         }
       });
 
-      setTempAdvances(prev => {
+      setTempAdvances(_prev => {
         // Merge with previous to not lose other edits if any (though usually we load on mount/month change)
         // Actually, we should merge carefully.
         // For now, let's just use the loaded overrides as the base state for this month.
@@ -174,7 +174,7 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
         adv.year === selectedYear
       );
 
-      const baseDetail = calculateSalary(member, attendanceMetrics, memberAdvances, advances, attendance, selectedMonth, selectedYear);
+      const baseDetail = calculateSalary(member, attendanceMetrics, memberAdvances ?? null, advances, attendance, selectedMonth, selectedYear);
 
       // Merge with overrides if present
       const override = overrides[member.id];
@@ -418,7 +418,7 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
     window.open(whatsappUrl, '_blank');
   };
 
-  const getAdvanceForStaff = (staffId: string) => {
+  const _getAdvanceForStaff = (staffId: string) => {
     return advances.find(adv =>
       adv.staffId === staffId &&
       adv.month === selectedMonth &&

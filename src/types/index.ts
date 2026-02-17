@@ -21,6 +21,7 @@ export interface Staff {
   contactNumber?: string;
   address?: string;
   photo?: string;
+  initialSalary?: number;
 }
 
 export interface Attendance {
@@ -28,16 +29,16 @@ export interface Attendance {
   staffId: string;
   date: string;
   status: 'Present' | 'Half Day' | 'Absent';
-  attendanceValue: number; // 1 for Present, 0.5 for Half Day, 0 for Absent
+  attendanceValue: number;
   isSunday?: boolean;
-  shift?: 'Morning' | 'Evening' | 'Both'; // For part-time staff
+  shift?: 'Morning' | 'Evening' | 'Both';
   isPartTime?: boolean;
-  staffName?: string; // For part-time staff (not stored permanently)
+  staffName?: string;
   location?: string;
-  salary?: number; // For part-time staff daily salary
-  salaryOverride?: boolean; // If salary was manually edited
-  arrivalTime?: string; // For part-time staff
-  leavingTime?: string; // For part-time staff
+  salary?: number;
+  salaryOverride?: boolean;
+  arrivalTime?: string;
+  leavingTime?: string;
 }
 
 export interface SalaryDetail {
@@ -107,7 +108,7 @@ export interface OldStaffRecord {
   reason: string;
   salaryHistory: SalaryDetail[];
   totalAdvanceOutstanding: number;
-  lastAdvanceData?: AdvanceDeduction; // Store last month's advance data for rejoin
+  lastAdvanceData?: AdvanceDeduction;
   contactNumber?: string;
   address?: string;
   photo?: string;
@@ -142,6 +143,25 @@ export interface User {
   email: string;
   role: 'admin' | 'manager';
   location?: string;
+}
+
+export interface SalaryCategory {
+  id: string;
+  name: string;
+  key: string;
+}
+
+export interface SalaryOverride {
+  id?: string;
+  staffId: string;
+  month: number;
+  year: number;
+  basicOverride?: number;
+  incentiveOverride?: number;
+  hraOverride?: number;
+  mealAllowanceOverride?: number;
+  sundayPenaltyOverride?: number;
+  salarySupplementsOverride?: Record<string, number>;
 }
 
 export type NavigationTab = 'Dashboard' | 'Staff Management' | 'Attendance' | 'Salary Management' | 'Part-Time Staff' | 'Old Staff Records' | 'Settings';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Staff, Attendance, AttendanceFilter } from '../types';
 import { Calendar, Download, Check, X, Filter, MapPin, Clock } from 'lucide-react';
-import { isSunday, getPartTimeDailySalary } from '../utils/salaryCalculations';
+import { isSunday } from '../utils/salaryCalculations';
 import { exportAttendancePDF } from '../utils/exportUtils';
 
 interface AttendanceTrackerProps {
@@ -379,7 +379,7 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
 
   const isSelectedDateSunday = isSunday(selectedDate);
   const filteredStaff = getFilteredStaff();
-  const filteredPartTimeAttendance = getFilteredPartTimeAttendance();
+  const _filteredPartTimeAttendance = getFilteredPartTimeAttendance();
 
   // Only show full-time staff in the attendance table (part-time details shown in Salary page)
   const combinedAttendanceData: any[] = [];
