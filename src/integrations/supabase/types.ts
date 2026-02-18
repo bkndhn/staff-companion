@@ -68,6 +68,36 @@ export type Database = {
         }
         Relationships: []
       }
+      app_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_valid: boolean
+          role: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_valid?: boolean
+          role: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_valid?: boolean
+          role?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_users: {
         Row: {
           created_at: string | null
