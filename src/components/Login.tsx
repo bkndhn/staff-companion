@@ -49,18 +49,22 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     try {
       // Authenticate against Supabase app_users table
-      const dbUser = await userService.validateLogin(sanitizedEmail, password);
+      const result = await userService.validateLogin(sanitizedEmail, password);
 
-      if (dbUser) {
+      if (result) {
+        const { user: dbUser, sessionToken } = result;
         // Clear failed attempts on success
         clearFailedAttempts(sanitizedEmail);
 
-        // Create secure session
-        const session = createSecureSession({
-          email: dbUser.email,
-          role: dbUser.role,
-          location: dbUser.location
-        });
+        // Create secure session including the server-issued session token
+        const session = {
+          ...createSecureSession({
+            email: dbUser.email,
+            role: dbUser.role,
+            location: dbUser.location
+          }),
+          sessionToken
+        };
 
         localStorage.setItem('staffManagementLogin', JSON.stringify(session));
 

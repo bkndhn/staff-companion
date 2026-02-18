@@ -60,7 +60,7 @@ export const userService = {
     /**
      * Validate user login credentials via secure Edge Function (bcrypt server-side)
      */
-    async validateLogin(email: string, password: string): Promise<AppUser | null> {
+    async validateLogin(email: string, password: string): Promise<{ user: AppUser; sessionToken: string } | null> {
         try {
             const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-login`, {
                 method: 'POST',
@@ -75,13 +75,16 @@ export const userService = {
                 return null;
             }
 
-            const { user } = await response.json();
-            if (!user) return null;
+            const { user, sessionToken } = await response.json();
+            if (!user || !sessionToken) return null;
 
             return {
-                ...user,
-                role: user.role as 'admin' | 'manager',
-                is_active: user.is_active ?? true
+                user: {
+                    ...user,
+                    role: user.role as 'admin' | 'manager',
+                    is_active: user.is_active ?? true
+                },
+                sessionToken
             };
         } catch (err) {
             console.error('Login error:', err);
@@ -90,15 +93,31 @@ export const userService = {
     },
 
     /**
+     * Get the stored session token from localStorage
+     */
+    getSessionToken(): string | null {
+        try {
+            const saved = localStorage.getItem('staffManagementLogin');
+            if (!saved) return null;
+            const data = JSON.parse(saved);
+            return data?.sessionToken || null;
+        } catch {
+            return null;
+        }
+    },
+
+    /**
      * Create a new user via secure Edge Function (bcrypt server-side)
      */
     async createUser(input: CreateUserInput): Promise<AppUser | null> {
+        const sessionToken = this.getSessionToken();
         try {
             const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-create-user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                    ...(sessionToken ? { 'x-session-token': sessionToken } : {}),
                 },
                 body: JSON.stringify({
                     email: input.email,
@@ -130,12 +149,14 @@ export const userService = {
     async updateUser(id: string, input: UpdateUserInput): Promise<AppUser | null> {
         // If password is being updated, use secure edge function
         if (input.password) {
+            const sessionToken = this.getSessionToken();
             try {
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-update-password`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                        ...(sessionToken ? { 'x-session-token': sessionToken } : {}),
                     },
                     body: JSON.stringify({ userId: id, newPassword: input.password }),
                 });
@@ -186,6 +207,7 @@ export const userService = {
      */
     async regeneratePassword(id: string): Promise<string | null> {
         const newPassword = this.generateRandomPassword();
+        const sessionToken = this.getSessionToken();
 
         try {
             const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-update-password`, {
@@ -193,6 +215,7 @@ export const userService = {
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                    ...(sessionToken ? { 'x-session-token': sessionToken } : {}),
                 },
                 body: JSON.stringify({ userId: id, newPassword }),
             });
