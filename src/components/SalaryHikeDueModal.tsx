@@ -86,7 +86,7 @@ const SalaryHikeDueModal: React.FC<SalaryHikeDueModalProps> = ({
                     <div className="flex items-center gap-2">
                         <button
                             onClick={exportToExcel}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-white text-orange-600 hover:bg-orange-50 rounded-lg text-sm font-medium transition-colors"
                         >
                             <Download size={16} />
                             Export Excel

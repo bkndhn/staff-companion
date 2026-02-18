@@ -1078,8 +1078,21 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               </button>
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {salaryCategories.map(cat => (
-                <div key={cat.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              {/* Built-in categories (read-only display) */}
+              {[
+                { id: 'basic', name: 'Basic Salary' },
+                { id: 'incentive', name: 'Incentive' },
+                { id: 'hra', name: 'HRA' },
+                { id: 'meal_allowance', name: 'Meal Allowance' },
+              ].map(cat => (
+                <div key={cat.id} className="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
+                  <span className="text-sm text-gray-500">{cat.name}</span>
+                  <span className="text-xs text-gray-400 italic px-2 py-0.5 bg-gray-200 rounded">Built-in</span>
+                </div>
+              ))}
+              {/* Custom categories */}
+              {salaryCategories.filter(cat => !['basic', 'incentive', 'hra'].includes(cat.id)).map(cat => (
+                <div key={cat.id} className={`flex items-center justify-between p-2 rounded-lg ${(cat as any).isDeleted ? 'bg-red-50 opacity-60' : 'bg-gray-50'}`}>
                   {editingCategory === cat.id ? (
                     <>
                       <input
@@ -1109,25 +1122,46 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                     </>
                   ) : (
                     <>
-                      <span>{cat.name}</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => { setEditingCategory(cat.id); setEditCategoryValue(cat.name); }}
-                          className="text-blue-500 hover:text-blue-700"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        {!['basic', 'incentive', 'hra'].includes(cat.id) && (
+                      <span className={`text-sm ${(cat as any).isDeleted ? 'line-through text-gray-400' : 'text-gray-700'}`}>{cat.name}</span>
+                      <div className="flex gap-2 items-center">
+                        {!(cat as any).isDeleted && (
                           <button
-                            onClick={() => {
-                              const updated = settingsService.deleteSalaryCategory(cat.id);
-                              setSalaryCategories(updated);
-                            }}
-                            className="text-red-500 hover:text-red-700"
+                            onClick={() => { setEditingCategory(cat.id); setEditCategoryValue(cat.name); }}
+                            className="text-blue-500 hover:text-blue-700"
+                            title="Edit"
                           >
-                            <Trash2 size={16} />
+                            <Edit2 size={16} />
                           </button>
                         )}
+                        <button
+                          onClick={() => {
+                            if ((cat as any).isDeleted) {
+                              // Restore
+                              const all = settingsService.getSalaryCategories();
+                              const idx = all.findIndex(c => c.id === cat.id);
+                              if (idx !== -1) {
+                                const updated = [...all];
+                                (updated[idx] as any).isDeleted = false;
+                                localStorage.setItem('staff_management_salary_categories', JSON.stringify(updated));
+                                setSalaryCategories(updated);
+                              }
+                            } else {
+                              // Soft delete
+                              const all = settingsService.getSalaryCategories();
+                              const idx = all.findIndex(c => c.id === cat.id);
+                              if (idx !== -1) {
+                                const updated = [...all];
+                                (updated[idx] as any).isDeleted = true;
+                                localStorage.setItem('staff_management_salary_categories', JSON.stringify(updated));
+                                setSalaryCategories(updated);
+                              }
+                            }
+                          }}
+                          className={(cat as any).isDeleted ? 'text-green-500 hover:text-green-700' : 'text-red-500 hover:text-red-700'}
+                          title={(cat as any).isDeleted ? 'Restore' : 'Soft Delete'}
+                        >
+                          {(cat as any).isDeleted ? <Check size={16} /> : <Trash2 size={16} />}
+                        </button>
                       </div>
                     </>
                   )}
