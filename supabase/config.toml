@@ -1,1 +1,10 @@
 project_id = "nsmppwnpdxomjmgrtqka"
+
+[functions.auth-login]
+verify_jwt = false
+
+[functions.auth-update-password]
+verify_jwt = false
+
+[functions.auth-create-user]
+verify_jwt = false
