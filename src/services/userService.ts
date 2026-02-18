@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
-import { simpleHash } from '../lib/security';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://nsmppwnpdxomjmgrtqka.supabase.co";
 
 export interface AppUser {
     id: string;
@@ -8,7 +9,6 @@ export interface AppUser {
     role: 'admin' | 'manager';
     location: string | null;
     location_id?: string | null;
-    password_hash?: string;
     is_active: boolean;
     last_login?: string | null;
     created_at?: string;
@@ -36,11 +36,11 @@ export interface UpdateUserInput {
 
 export const userService = {
     /**
-     * Get all users (for admin settings page)
+     * Get all users (for admin settings page) - reads from safe public view
      */
     async getUsers(): Promise<AppUser[]> {
         const { data, error } = await supabase
-            .from('app_users')
+            .from('app_users_public' as any)
             .select('id, email, full_name, role, location, location_id, is_active, last_login, created_at, updated_at')
             .eq('is_active', true)
             .order('full_name');
@@ -50,7 +50,7 @@ export const userService = {
             return [];
         }
 
-        return (data || []).map(user => ({
+        return (data || []).map((user: any) => ({
             ...user,
             role: user.role as 'admin' | 'manager',
             is_active: user.is_active ?? true
@@ -58,93 +58,99 @@ export const userService = {
     },
 
     /**
-     * Get user by email for login validation
-     */
-    async getUserByEmail(email: string): Promise<AppUser | null> {
-        const { data, error } = await supabase
-            .from('app_users')
-            .select('*')
-            .eq('email', email.toLowerCase())
-            .eq('is_active', true)
-            .single();
-
-        if (error) {
-            if (error.code !== 'PGRST116') { // Not found error
-                console.error('Error fetching user:', error);
-            }
-            return null;
-        }
-
-        return data ? {
-            ...data,
-            role: data.role as 'admin' | 'manager',
-            is_active: data.is_active ?? true
-        } : null;
-    },
-
-    /**
-     * Validate user login credentials and update last login
+     * Validate user login credentials via secure Edge Function (bcrypt server-side)
      */
     async validateLogin(email: string, password: string): Promise<AppUser | null> {
-        const user = await this.getUserByEmail(email);
+        try {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                },
+                body: JSON.stringify({ email, password }),
+            });
 
-        if (!user || !user.password_hash) {
+            if (!response.ok) {
+                return null;
+            }
+
+            const { user } = await response.json();
+            if (!user) return null;
+
+            return {
+                ...user,
+                role: user.role as 'admin' | 'manager',
+                is_active: user.is_active ?? true
+            };
+        } catch (err) {
+            console.error('Login error:', err);
             return null;
         }
-
-        // Compare password hash
-        const passwordHash = simpleHash(password);
-        if (user.password_hash !== passwordHash) {
-            return null;
-        }
-
-        // Update last login timestamp
-        await supabase
-            .from('app_users')
-            .update({ last_login: new Date().toISOString() })
-            .eq('id', user.id);
-
-        // Return user without password hash
-        const { password_hash, ...userWithoutPassword } = user;
-        return { ...userWithoutPassword, last_login: new Date().toISOString() } as AppUser;
     },
 
     /**
-     * Create a new user
+     * Create a new user via secure Edge Function (bcrypt server-side)
      */
     async createUser(input: CreateUserInput): Promise<AppUser | null> {
-        const passwordHash = simpleHash(input.password);
+        try {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-create-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                },
+                body: JSON.stringify({
+                    email: input.email,
+                    password: input.password,
+                    full_name: input.full_name,
+                    role: input.role,
+                    location: input.location || null,
+                    location_id: input.location_id || null,
+                }),
+            });
 
-        const { data, error } = await supabase
-            .from('app_users')
-            .insert([{
-                email: input.email.toLowerCase(),
-                password_hash: passwordHash,
-                full_name: input.full_name,
-                role: input.role,
-                location: input.location || null,
-                location_id: input.location_id || null,
-                is_active: true
-            }])
-            .select()
-            .single();
+            if (!response.ok) {
+                const err = await response.json();
+                console.error('Error creating user:', err);
+                return null;
+            }
 
-        if (error) {
-            console.error('Error creating user:', error);
+            const { user } = await response.json();
+            return user ? { ...user, role: user.role as 'admin' | 'manager', is_active: user.is_active ?? true } : null;
+        } catch (err) {
+            console.error('Error creating user:', err);
             return null;
         }
-
-        return data ? {
-            ...data,
-            role: data.role as 'admin' | 'manager',
-            is_active: data.is_active ?? true
-        } : null;
     },
 
     /**
      * Update an existing user
      */
     async updateUser(id: string, input: UpdateUserInput): Promise<AppUser | null> {
+        // If password is being updated, use secure edge function
+        if (input.password) {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-update-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                    },
+                    body: JSON.stringify({ userId: id, newPassword: input.password }),
+                });
+
+                if (!response.ok) {
+                    console.error('Error updating password');
+                    return null;
+                }
+            } catch (err) {
+                console.error('Error updating password:', err);
+                return null;
+            }
+        }
+
+        // Update non-password fields via Supabase client
         const updates: Record<string, unknown> = {
             updated_at: new Date().toISOString()
         };
@@ -155,13 +161,12 @@ export const userService = {
         if (input.location !== undefined) updates.location = input.location;
         if (input.location_id !== undefined) updates.location_id = input.location_id;
         if (input.is_active !== undefined) updates.is_active = input.is_active;
-        if (input.password) updates.password_hash = simpleHash(input.password);
 
         const { data, error } = await supabase
             .from('app_users')
             .update(updates)
             .eq('id', id)
-            .select()
+            .select('id, email, full_name, role, location, location_id, is_active, last_login, created_at, updated_at')
             .single();
 
         if (error) {
@@ -177,26 +182,31 @@ export const userService = {
     },
 
     /**
-     * Regenerate password for a user
+     * Regenerate password for a user via secure Edge Function
      */
     async regeneratePassword(id: string): Promise<string | null> {
         const newPassword = this.generateRandomPassword();
-        const passwordHash = simpleHash(newPassword);
 
-        const { error } = await supabase
-            .from('app_users')
-            .update({
-                password_hash: passwordHash,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', id);
+        try {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-update-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+                },
+                body: JSON.stringify({ userId: id, newPassword }),
+            });
 
-        if (error) {
-            console.error('Error regenerating password:', error);
+            if (!response.ok) {
+                console.error('Error regenerating password');
+                return null;
+            }
+
+            return newPassword;
+        } catch (err) {
+            console.error('Error regenerating password:', err);
             return null;
         }
-
-        return newPassword;
     },
 
     /**
@@ -268,12 +278,9 @@ export const userService = {
      * Generate default credentials for a new location
      */
     generateCredentialsForLocation(locationName: string): { email: string; password: string } {
-        // Convert location name to lowercase and remove spaces/special chars
         const cleanName = locationName.toLowerCase().replace(/[^a-z0-9]/g, '');
         const shortName = cleanName.substring(0, 3);
         const capShortName = shortName.charAt(0).toUpperCase() + shortName.slice(1);
-
-        // Generate random 3-digit suffix for password
         const randomSuffix = Math.floor(100 + Math.random() * 900);
 
         return {
