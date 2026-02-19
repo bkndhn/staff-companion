@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Staff, SalaryHike } from '../types';
-import { type SalaryCategory } from '../services/settingsService';
 import { Users, Plus, Edit2, Trash2, Archive, Calendar, TrendingUp, MapPin, DollarSign, Check, X, GripVertical, Filter, Copy, AlertCircle } from 'lucide-react';
 import { calculateExperience } from '../utils/salaryCalculations';
 import SalaryHikeHistory from './SalaryHikeHistory';
 import SalaryHikeDueModal from './SalaryHikeDueModal';
 import { settingsService } from '../services/settingsService';
+import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
 
 interface StaffManagementProps {
   staff: Staff[];
@@ -43,11 +43,11 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   // Settings State
   const [showLocationManager, setShowLocationManager] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [locations, setLocations] = useState<{ id: string; name: string }[]>([]); // Changed to object array
-  const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>(settingsService.getSalaryCategories());
+  const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
+  const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>(() => salaryCategoryService.getCategoriesSync());
   const [newLocation, setNewLocation] = useState('');
   const [newCategory, setNewCategory] = useState('');
-  const [editingLocation, setEditingLocation] = useState<{ id: string; name: string } | null>(null); // Changed to object
+  const [editingLocation, setEditingLocation] = useState<{ id: string; name: string } | null>(null);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editLocationValue, setEditLocationValue] = useState('');
   const [editCategoryValue, setEditCategoryValue] = useState('');
@@ -58,15 +58,17 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   const [credentialsModal, setCredentialsModal] = useState<{ credentials: { email: string; password: string }; locationName: string } | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  // Fetch locations on mount
+  // Fetch locations and categories on mount
   React.useEffect(() => {
-    const fetchLocations = async () => {
-      // Dynamic import to avoid circular dependency
+    const fetchData = async () => {
       const { locationService } = await import('../services/locationService');
       const locs = await locationService.getLocations();
       setLocations(locs);
+      // Also load categories from DB
+      const cats = await salaryCategoryService.getCategories();
+      setSalaryCategories(cats);
     };
-    fetchLocations();
+    fetchData();
   }, []);
 
   const [formData, setFormData] = useState({
@@ -175,9 +177,32 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     }
   };
 
-  // ... (rest of component)
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) return;
+    const cat = await salaryCategoryService.addCategory(newCategory.trim());
+    if (cat) {
+      setSalaryCategories(await salaryCategoryService.getCategories());
+      setNewCategory('');
+    }
+  };
 
-  // Need to update the render logic for "Manage Locations" modal to use objects
+  const handleSaveCategoryEdit = async (id: string) => {
+    if (!editCategoryValue.trim()) return;
+    await salaryCategoryService.updateCategory(id, editCategoryValue.trim());
+    setSalaryCategories(await salaryCategoryService.getCategories());
+    setEditingCategory(null);
+  };
+
+  const handleToggleCategoryDelete = async (id: string, isDeleted: boolean) => {
+    if (isDeleted) {
+      await salaryCategoryService.restoreCategory(id);
+    } else {
+      await salaryCategoryService.softDeleteCategory(id);
+    }
+    setSalaryCategories(await salaryCategoryService.getCategories());
+  };
+
+  // ... (rest of component)
   // and update dropdowns to map locations.
 
 
@@ -989,6 +1014,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                         onChange={(e) => setEditLocationValue(e.target.value)}
                         className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                         autoFocus
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateLocation(loc.id); if (e.key === 'Escape') setEditingLocation(null); }}
                       />
                       <button
                         onClick={() => handleUpdateLocation(loc.id)}
@@ -1008,7 +1034,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                   ) : (
                     <>
                       <span className="font-medium text-gray-700">{loc.name}</span>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => {
                             setEditingLocation(loc);
@@ -1063,36 +1089,19 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 onChange={(e) => setNewCategory(e.target.value)}
                 placeholder="New Category Name"
                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                onKeyDown={(e) => { if (e.key === 'Enter' && newCategory.trim()) handleAddCategory(); }}
               />
               <button
-                onClick={() => {
-                  if (newCategory.trim()) {
-                    const updated = settingsService.addSalaryCategory(newCategory.trim());
-                    setSalaryCategories(updated);
-                    setNewCategory('');
-                  }
-                }}
-                className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 whitespace-nowrap"
+                onClick={handleAddCategory}
+                disabled={!newCategory.trim()}
+                className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 Add
               </button>
             </div>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {/* Built-in categories (read-only display) */}
-              {[
-                { id: 'basic', name: 'Basic Salary' },
-                { id: 'incentive', name: 'Incentive' },
-                { id: 'hra', name: 'HRA' },
-                { id: 'meal_allowance', name: 'Meal Allowance' },
-              ].map(cat => (
-                <div key={cat.id} className="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
-                  <span className="text-sm text-gray-500">{cat.name}</span>
-                  <span className="text-xs text-gray-400 italic px-2 py-0.5 bg-gray-200 rounded">Built-in</span>
-                </div>
-              ))}
-              {/* Custom categories */}
-              {salaryCategories.filter(cat => !['basic', 'incentive', 'hra'].includes(cat.id)).map(cat => (
-                <div key={cat.id} className={`flex items-center justify-between p-2 rounded-lg ${(cat as any).isDeleted ? 'bg-red-50 opacity-60' : 'bg-gray-50'}`}>
+            <div className="space-y-2 max-h-72 overflow-y-auto">
+              {salaryCategories.map(cat => (
+                <div key={cat.id} className={`flex items-center justify-between p-2.5 rounded-lg border ${cat.isDeleted ? 'bg-red-50 border-red-100 opacity-60' : cat.isBuiltIn ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-100'}`}>
                   {editingCategory === cat.id ? (
                     <>
                       <input
@@ -1101,74 +1110,50 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                         onChange={(e) => setEditCategoryValue(e.target.value)}
                         className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                         autoFocus
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveCategoryEdit(cat.id); if (e.key === 'Escape') setEditingCategory(null); }}
                       />
                       <div className="flex gap-2 ml-2">
-                        <button
-                          onClick={() => {
-                            if (editCategoryValue.trim()) {
-                              const updated = settingsService.updateSalaryCategory(cat.id, editCategoryValue.trim());
-                              setSalaryCategories(updated);
-                              setEditingCategory(null);
-                            }
-                          }}
-                          className="text-green-600 hover:text-green-700"
-                        >
+                        <button onClick={() => handleSaveCategoryEdit(cat.id)} className="text-green-600 hover:text-green-700" title="Save">
                           <Check size={16} />
                         </button>
-                        <button onClick={() => setEditingCategory(null)} className="text-gray-500 hover:text-gray-700">
+                        <button onClick={() => setEditingCategory(null)} className="text-gray-500 hover:text-gray-700" title="Cancel">
                           <X size={16} />
                         </button>
                       </div>
                     </>
                   ) : (
                     <>
-                      <span className={`text-sm ${(cat as any).isDeleted ? 'line-through text-gray-400' : 'text-gray-700'}`}>{cat.name}</span>
-                      <div className="flex gap-2 items-center">
-                        {!(cat as any).isDeleted && (
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium ${cat.isDeleted ? 'line-through text-gray-400' : cat.isBuiltIn ? 'text-blue-700' : 'text-gray-700'}`}>{cat.name}</span>
+                        {cat.isBuiltIn && <span className="text-xs text-blue-400 italic px-1.5 py-0.5 bg-blue-100 rounded">Built-in</span>}
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        {!cat.isDeleted && (
                           <button
                             onClick={() => { setEditingCategory(cat.id); setEditCategoryValue(cat.name); }}
-                            className="text-blue-500 hover:text-blue-700"
-                            title="Edit"
+                            className="p-1 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit name"
                           >
-                            <Edit2 size={16} />
+                            <Edit2 size={14} />
                           </button>
                         )}
-                        <button
-                          onClick={() => {
-                            if ((cat as any).isDeleted) {
-                              // Restore
-                              const all = settingsService.getSalaryCategories();
-                              const idx = all.findIndex(c => c.id === cat.id);
-                              if (idx !== -1) {
-                                const updated = [...all];
-                                (updated[idx] as any).isDeleted = false;
-                                localStorage.setItem('staff_management_salary_categories', JSON.stringify(updated));
-                                setSalaryCategories(updated);
-                              }
-                            } else {
-                              // Soft delete
-                              const all = settingsService.getSalaryCategories();
-                              const idx = all.findIndex(c => c.id === cat.id);
-                              if (idx !== -1) {
-                                const updated = [...all];
-                                (updated[idx] as any).isDeleted = true;
-                                localStorage.setItem('staff_management_salary_categories', JSON.stringify(updated));
-                                setSalaryCategories(updated);
-                              }
-                            }
-                          }}
-                          className={(cat as any).isDeleted ? 'text-green-500 hover:text-green-700' : 'text-red-500 hover:text-red-700'}
-                          title={(cat as any).isDeleted ? 'Restore' : 'Soft Delete'}
-                        >
-                          {(cat as any).isDeleted ? <Check size={16} /> : <Trash2 size={16} />}
-                        </button>
+                        {!cat.isBuiltIn && (
+                          <button
+                            onClick={() => handleToggleCategoryDelete(cat.id, cat.isDeleted ?? false)}
+                            className={`p-1 rounded-lg transition-colors ${cat.isDeleted ? 'text-green-500 hover:bg-green-50' : 'text-red-500 hover:bg-red-50'}`}
+                            title={cat.isDeleted ? 'Restore' : 'Soft Delete'}
+                          >
+                            {cat.isDeleted ? <Check size={14} /> : <Trash2 size={14} />}
+                          </button>
+                        )}
                       </div>
                     </>
                   )}
                 </div>
               ))}
             </div>
-            <div className="mt-6 flex justify-end">
+            <p className="text-xs text-gray-500 mt-3">Built-in categories can be renamed but not deleted. Custom categories can be soft-deleted and restored.</p>
+            <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setShowCategoryManager(false)}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"

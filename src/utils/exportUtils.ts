@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Staff, Attendance, SalaryDetail, OldStaffRecord, PartTimeSalaryDetail } from '../types';
+import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
 
 // Remove currency symbol for exports
 const formatNumberForExport = (value: number): number => {
@@ -63,17 +64,25 @@ export const exportAttendanceToExcel = (
   XLSX.writeFile(wb, `attendance-report-${selectedDate}.xlsx`);
 };
 
-export const exportSalaryToExcel = (
+export const exportSalaryToExcel = async (
   salaryDetails: SalaryDetail[],
   partTimeSalaries: PartTimeSalaryDetail[],
   staff: Staff[],
   month: number,
   year: number
 ) => {
+  // Load categories for dynamic columns
+  const allCategories = await salaryCategoryService.getCategories();
+  const customCategories = allCategories.filter((c: SalaryCategory) => !['basic', 'incentive', 'hra', 'meal_allowance'].includes(c.id) && !c.isDeleted);
+  const basicName = allCategories.find((c: SalaryCategory) => c.id === 'basic')?.name || 'Basic';
+  const incentiveName = allCategories.find((c: SalaryCategory) => c.id === 'incentive')?.name || 'Incentive';
+  const hraName = allCategories.find((c: SalaryCategory) => c.id === 'hra')?.name || 'HRA';
+  const mealName = allCategories.find((c: SalaryCategory) => c.id === 'meal_allowance')?.name || 'Meal Allowance';
+
   // Full-time staff data
   const fullTimeData = salaryDetails.map((detail, index) => {
     const staffMember = staff.find(s => s.id === detail.staffId);
-    return {
+    const row: Record<string, string | number> = {
       'S.No': index + 1,
       'Name': staffMember?.name || 'Unknown',
       'Present': detail.presentDays,
@@ -83,14 +92,21 @@ export const exportSalaryToExcel = (
       'Old Advance': formatNumberForExport(detail.oldAdv),
       'Current Advance': formatNumberForExport(detail.curAdv),
       'Deduction': formatNumberForExport(detail.deduction),
-      'Basic Earned': formatNumberForExport(detail.basicEarned),
-      'Incentive Earned': formatNumberForExport(detail.incentiveEarned),
-      'HRA Earned': formatNumberForExport(detail.hraEarned),
-      'Sunday Penalty': formatNumberForExport(detail.sundayPenalty),
-      'Gross Salary': formatNumberForExport(detail.grossSalary),
-      'Net Salary': formatNumberForExport(detail.netSalary),
-      'New Advance': formatNumberForExport(detail.newAdv)
+      [`${basicName} Earned`]: formatNumberForExport(detail.basicEarned),
+      [`${incentiveName} Earned`]: formatNumberForExport(detail.incentiveEarned),
+      [`${hraName} Earned`]: formatNumberForExport(detail.hraEarned),
+      [`${mealName} Earned`]: formatNumberForExport(detail.mealAllowance),
     };
+    // Add custom supplement columns
+    customCategories.forEach((cat: SalaryCategory) => {
+      const val = staffMember?.salarySupplements?.[cat.key] || staffMember?.salarySupplements?.[cat.id] || 0;
+      row[cat.name] = formatNumberForExport(val);
+    });
+    row['Sunday Penalty'] = formatNumberForExport(detail.sundayPenalty);
+    row['Gross Salary'] = formatNumberForExport(detail.grossSalary);
+    row['Net Salary'] = formatNumberForExport(detail.netSalary);
+    row['New Advance'] = formatNumberForExport(detail.newAdv);
+    return row;
   });
 
   // Part-time staff data
@@ -176,7 +192,7 @@ export const exportAttendancePDF = (
   doc.save(`attendance-report-${selectedDate}.pdf`);
 };
 
-export const exportSalaryPDF = (
+export const exportSalaryPDF = async (
   salaryDetails: SalaryDetail[],
   partTimeSalaries: PartTimeSalaryDetail[],
   staff: Staff[],
@@ -184,6 +200,14 @@ export const exportSalaryPDF = (
   year: number
 ) => {
   const doc = new jsPDF('landscape');
+
+  // Load categories for dynamic columns
+  const allCategories = await salaryCategoryService.getCategories();
+  const customCategories = allCategories.filter((c: SalaryCategory) => !['basic', 'incentive', 'hra', 'meal_allowance'].includes(c.id) && !c.isDeleted);
+  const basicName = allCategories.find((c: SalaryCategory) => c.id === 'basic')?.name || 'Basic';
+  const incentiveName = allCategories.find((c: SalaryCategory) => c.id === 'incentive')?.name || 'Incentive';
+  const hraName = allCategories.find((c: SalaryCategory) => c.id === 'hra')?.name || 'HRA';
+  const mealName = allCategories.find((c: SalaryCategory) => c.id === 'meal_allowance')?.name || 'Meal Allowance';
 
   // Header
   doc.setFontSize(20);
@@ -195,8 +219,15 @@ export const exportSalaryPDF = (
 
   // Full-time staff salary data (only if there are full-time salaries)
   if (salaryDetails.length > 0) {
+    const customHeaders = customCategories.map((c: SalaryCategory) => c.name);
+    const headers = ['S.No', 'Name', 'Present', 'Half', 'Leave', 'Sun Abs', 'Old Adv', 'Cur Adv', 'Deduction', basicName, incentiveName, hraName, mealName, ...customHeaders, 'Sun Penalty', 'Gross', 'Net Salary', 'New Adv'];
+
     const fullTimeData = salaryDetails.map((detail, index) => {
       const staffMember = staff.find(s => s.id === detail.staffId);
+      const customVals = customCategories.map((cat: SalaryCategory) => {
+        const val = staffMember?.salarySupplements?.[cat.key] || staffMember?.salarySupplements?.[cat.id] || 0;
+        return formatCurrencyForExport(val);
+      });
       return [
         index + 1,
         staffMember?.name || 'Unknown',
@@ -210,6 +241,8 @@ export const exportSalaryPDF = (
         formatCurrencyForExport(detail.basicEarned),
         formatCurrencyForExport(detail.incentiveEarned),
         formatCurrencyForExport(detail.hraEarned),
+        formatCurrencyForExport(detail.mealAllowance),
+        ...customVals,
         formatCurrencyForExport(detail.sundayPenalty),
         formatCurrencyForExport(detail.grossSalary),
         formatCurrencyForExport(detail.netSalary),
@@ -218,7 +251,7 @@ export const exportSalaryPDF = (
     });
 
     autoTable(doc, {
-      head: [['S.No', 'Name', 'Present', 'Half', 'Leave', 'Sun Abs', 'Old Adv', 'Cur Adv', 'Deduction', 'Basic', 'Incentive', 'HRA', 'Sun Penalty', 'Gross', 'Net Salary', 'New Adv']],
+      head: [headers],
       body: fullTimeData,
       startY: currentY,
       styles: { fontSize: 8 },

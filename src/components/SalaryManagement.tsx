@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Staff, Attendance, SalaryDetail, AdvanceDeduction, PartTimeSalaryDetail, SalaryOverride } from '../types';
 import { DollarSign, Download, Users, Calendar, TrendingUp, Edit2, Save, X, FileSpreadsheet, FileText, MessageCircle } from 'lucide-react';
 import { calculateAttendanceMetrics, calculateSalary, calculatePartTimeSalary, roundToNearest10 } from '../utils/salaryCalculations';
 import { exportSalaryToExcel, exportSalaryPDF, generateSalarySlipPDF, exportBulkSalarySlipsPDF } from '../utils/exportUtils';
-import { settingsService } from '../services/settingsService';
+import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
 import { salaryOverrideService } from '../services/salaryOverrideService';
 import BulkSalarySender from './BulkSalarySender';
 
@@ -54,10 +54,15 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
   const [tempAdvances, setTempAdvances] = useState<{ [key: string]: TempSalaryData }>({});
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const salaryCategories = settingsService.getSalaryCategories();
+  const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>(() => salaryCategoryService.getCategoriesSync());
   const [showBulkSender, setShowBulkSender] = useState(false);
 
-  const customCategories = salaryCategories.filter(c => !['basic', 'incentive', 'hra', 'meal_allowance'].includes(c.id));
+  // Load categories from DB on mount
+  useEffect(() => {
+    salaryCategoryService.getCategories().then(setSalaryCategories);
+  }, []);
+
+  const customCategories = salaryCategories.filter((c: SalaryCategory) => !['basic', 'incentive', 'hra', 'meal_allowance'].includes(c.id) && !c.isDeleted);
 
   // Load monthly overrides
   React.useEffect(() => {
@@ -380,10 +385,20 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
     const leaveDays = (detail.leaveDays - detail.halfDays * 0.5).toFixed(1);
 
     // Get salary category names
-    const basicName = salaryCategories.find(c => c.id === 'basic')?.name || 'Basic';
-    const incentiveName = salaryCategories.find(c => c.id === 'incentive')?.name || 'Incentive';
-    const hraName = salaryCategories.find(c => c.id === 'hra')?.name || 'HRA';
-    const mealName = salaryCategories.find(c => c.id === 'meal_allowance')?.name || 'Meal Allowance';
+    const basicName = salaryCategories.find((c: SalaryCategory) => c.id === 'basic')?.name || 'Basic';
+    const incentiveName = salaryCategories.find((c: SalaryCategory) => c.id === 'incentive')?.name || 'Incentive';
+    const hraName = salaryCategories.find((c: SalaryCategory) => c.id === 'hra')?.name || 'HRA';
+    const mealName = salaryCategories.find((c: SalaryCategory) => c.id === 'meal_allowance')?.name || 'Meal Allowance';
+
+    // Custom supplements for this staff member
+    const staffMemberData = staff.find(s => s.id === detail.staffId);
+    const customSupplLines = customCategories
+      .map((cat: SalaryCategory) => {
+        const val = staffMemberData?.salarySupplements?.[cat.key] || staffMemberData?.salarySupplements?.[cat.id] || 0;
+        return val > 0 ? `• ${cat.name}: ₹${val.toLocaleString()}\n` : '';
+      })
+      .filter(Boolean)
+      .join('');
 
     // Format salary slip message
     const message = `📋 *SALARY SLIP*\n` +
@@ -400,8 +415,9 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
       `• ${basicName}: ₹${detail.basicEarned.toLocaleString()}\n` +
       `• ${incentiveName}: ₹${detail.incentiveEarned.toLocaleString()}\n` +
       `• ${hraName}: ₹${detail.hraEarned.toLocaleString()}\n` +
-      `• ${mealName}: ₹${detail.mealAllowance.toLocaleString()}\n\n` +
-      `📉 *DEDUCTIONS*\n` +
+      `• ${mealName}: ₹${detail.mealAllowance.toLocaleString()}\n` +
+      customSupplLines +
+      `\n📉 *DEDUCTIONS*\n` +
       `• Old Advance: ₹${detail.oldAdv.toLocaleString()}\n` +
       `• Current Advance: ₹${detail.curAdv.toLocaleString()}\n` +
       `• Deduction: ₹${detail.deduction.toLocaleString()}\n` +
@@ -756,11 +772,11 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Old Adv</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cur Adv</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Deduction</th>
-                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find(c => c.id === 'basic')?.name || 'Basic'}</th>
-                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find(c => c.id === 'incentive')?.name || 'Incentive'}</th>
-                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find(c => c.id === 'hra')?.name || 'HRA'}</th>
-                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find(c => c.id === 'meal_allowance')?.name || 'Meal Allowance'}</th>
-                {customCategories.map(cat => (<th key={cat.id} className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{cat.name}</th>))}
+                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find((c: SalaryCategory) => c.id === 'basic')?.name || 'Basic'}</th>
+                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find((c: SalaryCategory) => c.id === 'incentive')?.name || 'Incentive'}</th>
+                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find((c: SalaryCategory) => c.id === 'hra')?.name || 'HRA'}</th>
+                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{salaryCategories.find((c: SalaryCategory) => c.id === 'meal_allowance')?.name || 'Meal Allowance'}</th>
+                {customCategories.map((cat: SalaryCategory) => (<th key={cat.id} className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{cat.name}</th>))}
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Sun Penalty</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Gross</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Net Salary</th>
