@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import bcrypt from "npm:bcryptjs@2.4.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
 
     // Upgrade to bcrypt if still using legacy hash
     if (!isBcrypt) {
-      const newHash = await bcrypt.hash(password);
+      const newHash = await bcrypt.hash(password, 10);
       await supabase
         .from('app_users')
         .update({ password_hash: newHash, last_login: new Date().toISOString() })
