@@ -2089,3 +2089,41 @@ body:not(.light-theme) .table-container table th {
 .text-force-medium {
   color: #374151 !important;
 }
+
+/* Light theme: ensure select option text is visible */
+body.light-theme select option {
+  background: #ffffff !important;
+  color: #1a1a2e !important;
+}
+
+/* Light theme: ensure all badge text stays visible */
+body.light-theme .badge-premium {
+  color: inherit;
+}
+
+/* Light theme: toggle/checkbox label text */
+body.light-theme .text-white\/70,
+body.light-theme .text-white\/60 {
+  color: rgba(26, 26, 46, 0.7) !important;
+}
+
+/* Light theme: stat-card text overrides */
+body.light-theme .stat-card p,
+body.light-theme .stat-card span {
+  color: rgba(26, 26, 46, 0.7) !important;
+}
+
+body.light-theme .stat-card .text-3xl,
+body.light-theme .stat-card [class*="font-bold"] {
+  color: inherit !important;
+}
+
+/* Light theme: months since hike text */
+body.light-theme .text-blue-600 {
+  color: #2563eb !important;
+}
+
+/* Light theme: ensure form labels and placeholders are visible */
+body.light-theme .input-premium::placeholder {
+  color: rgba(26, 26, 46, 0.4) !important;
+}

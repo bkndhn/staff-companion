@@ -431,7 +431,7 @@ function App() {
         staffName: currentStaff.name,
         currentSalary: currentStaff.totalSalary,
         newSalary: updatedStaff.totalSalary!,
-        onConfirm: async (isHike: boolean, reason?: string) => {
+        onConfirm: async (isHike: boolean, reason?: string, hikeDate?: string) => {
           try {
             // Update staff record
             const savedStaff = await staffService.update(id, updatedStaff);
@@ -439,14 +439,35 @@ function App() {
               member.id === id ? savedStaff : member
             ));
 
-            // If it's a hike, record it
+            // If it's a hike, record it with component breakdown
             if (isHike) {
+              // Build breakdown from the NEW values being set
+              const breakdown: Record<string, number> = {
+                basic: updatedStaff.basicSalary ?? currentStaff.basicSalary,
+                incentive: updatedStaff.incentive ?? currentStaff.incentive,
+                hra: updatedStaff.hra ?? currentStaff.hra,
+                meal_allowance: updatedStaff.mealAllowance ?? currentStaff.mealAllowance ?? 0,
+                ...(updatedStaff.salarySupplements ?? currentStaff.salarySupplements ?? {})
+              };
+
+              // Also store the OLD values with a prefix for accurate diff display
+              const oldBreakdown: Record<string, number> = {
+                old_basic: currentStaff.basicSalary,
+                old_incentive: currentStaff.incentive,
+                old_hra: currentStaff.hra,
+                old_meal_allowance: currentStaff.mealAllowance ?? 0,
+                ...Object.fromEntries(
+                  Object.entries(currentStaff.salarySupplements ?? {}).map(([k, v]) => [`old_${k}`, v])
+                )
+              };
+
               const salaryHike = {
                 staffId: id,
                 oldSalary: currentStaff.totalSalary,
                 newSalary: updatedStaff.totalSalary!,
-                hikeDate: new Date().toISOString(),
-                reason
+                hikeDate: hikeDate || new Date().toISOString().split('T')[0],
+                reason,
+                breakdown: { ...breakdown, ...oldBreakdown }
               };
 
               const savedHike = await salaryHikeService.create(salaryHike);

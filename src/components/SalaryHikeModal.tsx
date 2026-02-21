@@ -7,7 +7,7 @@ interface SalaryHikeModalProps {
   staffName: string;
   currentSalary: number;
   newSalary: number;
-  onConfirm: (isHike: boolean, reason?: string) => void;
+  onConfirm: (isHike: boolean, reason?: string, hikeDate?: string) => void;
 }
 
 const SalaryHikeModal: React.FC<SalaryHikeModalProps> = ({
@@ -20,6 +20,7 @@ const SalaryHikeModal: React.FC<SalaryHikeModalProps> = ({
 }) => {
   const [isHike, setIsHike] = useState(true);
   const [reason, setReason] = useState('');
+  const [hikeDate, setHikeDate] = useState(new Date().toISOString().split('T')[0]);
 
   if (!isOpen) return null;
 
@@ -27,9 +28,10 @@ const SalaryHikeModal: React.FC<SalaryHikeModalProps> = ({
   const isIncrease = difference > 0;
 
   const handleConfirm = () => {
-    onConfirm(isHike, reason);
+    onConfirm(isHike, reason, hikeDate);
     onClose();
     setReason('');
+    setHikeDate(new Date().toISOString().split('T')[0]);
   };
 
   return (
@@ -98,18 +100,32 @@ const SalaryHikeModal: React.FC<SalaryHikeModalProps> = ({
           </div>
 
           {isHike && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Reason for Hike (Optional)
-              </label>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="e.g., Performance improvement, Annual increment, Promotion"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={3}
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Hike Date
+                </label>
+                <input
+                  type="date"
+                  value={hikeDate}
+                  onChange={(e) => setHikeDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason for Hike (Optional)
+                </label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="e.g., Performance improvement, Annual increment, Promotion"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                />
+              </div>
+            </>
           )}
         </div>
 

@@ -423,18 +423,21 @@ const SalaryHikeHistory: React.FC<SalaryHikeHistoryProps> = ({
                           let hasData = false;
 
                           if (hike.breakdown && hike.breakdown[category.id] !== undefined) {
-                            // Use stored breakdown
+                            // Use stored breakdown for new value
                             newValue = hike.breakdown[category.id];
 
-                            // Estimate oldValue based on ratio if we don't have previous breakdown
-                            // In a perfect world, we'd look at the hike before this one.
-                            // But for now, ratio-based estimate for old value is fine.
-                            const ratio = hike.oldSalary / hike.newSalary;
-                            oldValue = Math.round(newValue * ratio);
+                            // Use stored old value if available (old_basic, old_incentive, etc.)
+                            const oldKey = `old_${category.id}`;
+                            if (hike.breakdown[oldKey] !== undefined) {
+                              oldValue = hike.breakdown[oldKey];
+                            } else {
+                              // Fallback: estimate using ratio for legacy records without old_ prefix
+                              const ratio = hike.oldSalary / hike.newSalary;
+                              oldValue = Math.round(newValue * ratio);
+                            }
                             hasData = true;
                           } else {
-                            // Legacy record: fallback to ratio estimate for everything
-                            // Based on CURRENT staff values (not ideal for very old records but better than nothing)
+                            // Legacy record: fallback to ratio estimate
                             let currentVal = 0;
                             if (category.id === 'basic') currentVal = staff!.basicSalary;
                             else if (category.id === 'incentive') currentVal = staff!.incentive;
