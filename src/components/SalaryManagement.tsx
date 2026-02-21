@@ -903,6 +903,15 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
                         <span className="text-gray-900">₹{detail.mealAllowance}</span>
                       )}
                     </td>
+                    {/* Custom Salary Categories */}
+                    {customCategories.map((cat: SalaryCategory) => {
+                      const val = staffMember?.salarySupplements?.[cat.id] || staffMember?.salarySupplements?.[cat.key] || 0;
+                      return (
+                        <td key={cat.id} className="px-2 md:px-4 py-3 whitespace-nowrap text-center">
+                          <span className="text-gray-900">₹{val.toLocaleString()}</span>
+                        </td>
+                      );
+                    })}
                     {/* Sunday Penalty - Editable */}
                     <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center">
                       {editMode ? (
@@ -966,7 +975,7 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
                 <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center text-red-600">
                   ₹{totals.totalDeduction.toLocaleString()}
                 </td>
-                <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center" colSpan={4}></td>
+                <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center" colSpan={4 + customCategories.length}></td>
                 <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center text-green-600">
                   ₹{totals.totalGross.toLocaleString()}
                 </td>
