@@ -418,39 +418,34 @@ const SalaryHikeHistory: React.FC<SalaryHikeHistoryProps> = ({
                         }
 
                         return categories.map(category => {
-                          let newValue = 0;
-                          let oldValue = 0;
-                          let hasData = false;
-
-                          if (hike.breakdown && hike.breakdown[category.id] !== undefined) {
-                            // Use stored breakdown for new value
-                            newValue = hike.breakdown[category.id];
-
-                            // Use stored old value if available (old_basic, old_incentive, etc.)
-                            const oldKey = `old_${category.id}`;
-                            if (hike.breakdown[oldKey] !== undefined) {
-                              oldValue = hike.breakdown[oldKey];
-                            } else {
-                              // Fallback: estimate using ratio for legacy records without old_ prefix
-                              const ratio = hike.oldSalary / hike.newSalary;
-                              oldValue = Math.round(newValue * ratio);
+                          const getFromBreakdown = (data: Record<string, number> | undefined, ...keys: string[]): number | undefined => {
+                            if (!data) return undefined;
+                            for (const key of keys) {
+                              const value = data[key];
+                              if (typeof value === 'number') return value;
                             }
-                            hasData = true;
-                          } else {
-                            // Legacy record: fallback to ratio estimate
-                            let currentVal = 0;
-                            if (category.id === 'basic') currentVal = staff!.basicSalary;
-                            else if (category.id === 'incentive') currentVal = staff!.incentive;
-                            else if (category.id === 'hra') currentVal = staff!.hra;
-                            else if (category.id === 'meal_allowance') currentVal = staff!.mealAllowance || 0;
-                            else currentVal = staff!.salarySupplements?.[category.id] || 0;
+                            return undefined;
+                          };
 
-                            const ratio = hike.newSalary / currentSalary;
-                            newValue = Math.round(currentVal * ratio);
-                            const oldRatio = hike.oldSalary / hike.newSalary;
-                            oldValue = Math.round(newValue * oldRatio);
-                            hasData = newValue > 0 || oldValue > 0;
+                          let newValue = getFromBreakdown(hike.breakdown, category.id, category.key) ?? 0;
+                          let oldValue = getFromBreakdown(hike.breakdown, `old_${category.id}`, `old_${category.key}`) ?? 0;
+
+                          // If latest hike has missing new breakdown, derive from current staff values
+                          if (index === 0 && newValue === 0 && staff) {
+                            if (category.id === 'basic') newValue = staff.basicSalary;
+                            else if (category.id === 'incentive') newValue = staff.incentive;
+                            else if (category.id === 'hra') newValue = staff.hra;
+                            else if (category.id === 'meal_allowance') newValue = staff.mealAllowance || 0;
+                            else newValue = staff.salarySupplements?.[category.id] || staff.salarySupplements?.[category.key] || 0;
                           }
+
+                          // If old breakdown missing, use previous hike's new breakdown as source of truth
+                          if (oldValue === 0 && salaryHikes[index + 1]) {
+                            const previousHike = salaryHikes[index + 1];
+                            oldValue = getFromBreakdown(previousHike.breakdown, category.id, category.key) ?? oldValue;
+                          }
+
+                          const hasData = newValue > 0 || oldValue > 0;
 
                           if (!hasData) return null;
 

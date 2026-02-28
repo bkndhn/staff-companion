@@ -2127,3 +2127,24 @@ body.light-theme .text-blue-600 {
 body.light-theme .input-premium::placeholder {
   color: rgba(26, 26, 46, 0.4) !important;
 }
+
+/* Additional cross-page visibility hardening */
+body:not(.light-theme) .text-gray-900 { color: rgba(255, 255, 255, 0.95) !important; }
+body:not(.light-theme) .text-gray-800 { color: rgba(255, 255, 255, 0.9) !important; }
+body:not(.light-theme) .text-gray-700 { color: rgba(255, 255, 255, 0.82) !important; }
+body:not(.light-theme) .text-gray-600 { color: rgba(255, 255, 255, 0.72) !important; }
+body:not(.light-theme) .text-gray-500 { color: rgba(255, 255, 255, 0.62) !important; }
+
+body.light-theme .bg-white,
+body.light-theme .bg-gray-50,
+body.light-theme .bg-gray-100,
+body.light-theme [class*="bg-slate-"] {
+  background-color: #ffffff !important;
+}
+
+body.light-theme .sticky.bg-white,
+body.light-theme .sticky.bg-gray-50,
+body.light-theme td.sticky,
+body.light-theme th.sticky {
+  background-color: #ffffff !important;
+}

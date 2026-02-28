@@ -47,7 +47,7 @@ function App() {
     staffName: string;
     currentSalary: number;
     newSalary: number;
-    onConfirm: (isHike: boolean, reason?: string) => void;
+    onConfirm: (isHike: boolean, reason?: string, hikeDate?: string) => void;
   } | null>(null);
 
   // Theme state - Lifted from Dashboard
