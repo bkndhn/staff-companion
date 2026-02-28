@@ -234,7 +234,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   const calculateMemberTotalSalary = (member: Staff) => {
     let total = member.basicSalary + member.incentive + member.hra + (member.mealAllowance || 0);
     const customCategories = salaryCategories.filter(c => !['basic', 'incentive', 'hra', 'meal_allowance'].includes(c.id));
-    total += customCategories.reduce((sum, cat) => sum + (member.salarySupplements?.[cat.id] || 0), 0);
+    total += customCategories.reduce((sum, cat) => sum + (member.salarySupplements?.[cat.id] || member.salarySupplements?.[cat.key] || 0), 0);
     return total;
   };
 
@@ -295,13 +295,12 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       return;
     }
 
-    const salaryCategories = settingsService.getSalaryCategories();
     // Start with basic fields
     let totalSalary = (formData.basicSalary || 0) + (formData.incentive || 0) + (formData.hra || 0) + (formData.mealAllowance || 0);
 
     // Add custom categories (anything not basic, incentive, hra, meal_allowance)
     const customCategories = salaryCategories.filter(c => !['basic', 'incentive', 'hra', 'meal_allowance'].includes(c.id));
-    totalSalary += customCategories.reduce((sum, cat) => sum + (formData.salarySupplements[cat.id] || 0), 0);
+    totalSalary += customCategories.reduce((sum, cat) => sum + (formData.salarySupplements[cat.id] || formData.salarySupplements[cat.key] || 0), 0);
 
 
     const experience = calculateExperience(formData.joinedDate);
@@ -696,12 +695,13 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                   <label className="block text-sm font-medium text-white/70 mb-1">{category.name}</label>
                   <input
                     type="number"
-                    value={formData.salarySupplements[category.id] || 0}
+                    value={formData.salarySupplements[category.id] || formData.salarySupplements[category.key] || 0}
                     onChange={(e) => setFormData({
                       ...formData,
                       salarySupplements: {
                         ...formData.salarySupplements,
-                        [category.id]: Number(e.target.value)
+                        [category.id]: Number(e.target.value),
+                        [category.key]: Number(e.target.value)
                       }
                     })}
                     className="input-premium"
@@ -895,7 +895,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                     <td className="px-3 py-4 text-sm text-gray-900">₹{(member.mealAllowance || 0).toLocaleString()}</td>
                     {salaryCategories.filter(c => !['basic', 'incentive', 'hra', 'meal_allowance'].includes(c.id)).map(category => (
                       <td key={category.id} className="px-3 py-4 text-sm text-gray-900">
-                        ₹{(member.salarySupplements?.[category.id] || 0).toLocaleString()}
+                        ₹{(member.salarySupplements?.[category.id] || member.salarySupplements?.[category.key] || 0).toLocaleString()}
                       </td>
                     ))}
                     <td className="px-3 py-4 text-sm font-semibold text-green-600">₹{calculateMemberTotalSalary(member).toLocaleString()}</td>
