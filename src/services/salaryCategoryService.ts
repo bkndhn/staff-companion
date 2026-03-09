@@ -50,10 +50,11 @@ export const salaryCategoryService = {
   async getCategories(): Promise<SalaryCategory[]> {
     const builtInOverrides = getBuiltInOverrides();
 
-    // Get built-ins with any name overrides
+    // Get built-ins with any name overrides and deletion state
     const builtIns: SalaryCategory[] = DEFAULT_BUILT_INS.map(b => ({
       ...b,
       name: builtInOverrides[b.id] || b.name,
+      isDeleted: builtInOverrides[`${b.id}_deleted`] === 'true',
     }));
 
     // Get custom from Supabase
@@ -88,6 +89,7 @@ export const salaryCategoryService = {
     const builtIns = DEFAULT_BUILT_INS.map(b => ({
       ...b,
       name: builtInOverrides[b.id] || b.name,
+      isDeleted: builtInOverrides[`${b.id}_deleted`] === 'true',
     }));
     const localCustom = getLocalCustomCategories();
     return [...builtIns, ...localCustom];
@@ -166,9 +168,15 @@ export const salaryCategoryService = {
     return true;
   },
 
-  // Soft-delete (deactivate) a custom category
+  // Soft-delete (deactivate) a category (built-in or custom)
   async softDeleteCategory(id: string): Promise<boolean> {
-    if (BUILT_IN_IDS.includes(id)) return false; // can't delete built-ins
+    // For built-in categories, store deletion state locally
+    if (BUILT_IN_IDS.includes(id)) {
+      const overrides = getBuiltInOverrides();
+      overrides[`${id}_deleted`] = 'true';
+      localStorage.setItem(BUILT_IN_NAMES_KEY, JSON.stringify(overrides));
+      return true;
+    }
 
     const { error } = await supabase
       .from('salary_categories')
@@ -187,6 +195,14 @@ export const salaryCategoryService = {
 
   // Restore a soft-deleted category
   async restoreCategory(id: string): Promise<boolean> {
+    // For built-in categories, remove deletion state locally
+    if (BUILT_IN_IDS.includes(id)) {
+      const overrides = getBuiltInOverrides();
+      delete overrides[`${id}_deleted`];
+      localStorage.setItem(BUILT_IN_NAMES_KEY, JSON.stringify(overrides));
+      return true;
+    }
+
     const { error } = await supabase
       .from('salary_categories')
       .update({ is_active: true })
