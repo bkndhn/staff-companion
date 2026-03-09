@@ -166,9 +166,15 @@ export const salaryCategoryService = {
     return true;
   },
 
-  // Soft-delete (deactivate) a custom category
+  // Soft-delete (deactivate) a category (built-in or custom)
   async softDeleteCategory(id: string): Promise<boolean> {
-    if (BUILT_IN_IDS.includes(id)) return false; // can't delete built-ins
+    // For built-in categories, store deletion state locally
+    if (BUILT_IN_IDS.includes(id)) {
+      const overrides = getBuiltInOverrides();
+      overrides[`${id}_deleted`] = 'true';
+      localStorage.setItem(BUILT_IN_NAMES_KEY, JSON.stringify(overrides));
+      return true;
+    }
 
     const { error } = await supabase
       .from('salary_categories')
