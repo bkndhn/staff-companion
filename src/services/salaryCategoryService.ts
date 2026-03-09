@@ -50,10 +50,11 @@ export const salaryCategoryService = {
   async getCategories(): Promise<SalaryCategory[]> {
     const builtInOverrides = getBuiltInOverrides();
 
-    // Get built-ins with any name overrides
+    // Get built-ins with any name overrides and deletion state
     const builtIns: SalaryCategory[] = DEFAULT_BUILT_INS.map(b => ({
       ...b,
       name: builtInOverrides[b.id] || b.name,
+      isDeleted: builtInOverrides[`${b.id}_deleted`] === 'true',
     }));
 
     // Get custom from Supabase
