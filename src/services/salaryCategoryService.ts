@@ -89,6 +89,7 @@ export const salaryCategoryService = {
     const builtIns = DEFAULT_BUILT_INS.map(b => ({
       ...b,
       name: builtInOverrides[b.id] || b.name,
+      isDeleted: builtInOverrides[`${b.id}_deleted`] === 'true',
     }));
     const localCustom = getLocalCustomCategories();
     return [...builtIns, ...localCustom];
