@@ -193,6 +193,14 @@ export const salaryCategoryService = {
 
   // Restore a soft-deleted category
   async restoreCategory(id: string): Promise<boolean> {
+    // For built-in categories, remove deletion state locally
+    if (BUILT_IN_IDS.includes(id)) {
+      const overrides = getBuiltInOverrides();
+      delete overrides[`${id}_deleted`];
+      localStorage.setItem(BUILT_IN_NAMES_KEY, JSON.stringify(overrides));
+      return true;
+    }
+
     const { error } = await supabase
       .from('salary_categories')
       .update({ is_active: true })
