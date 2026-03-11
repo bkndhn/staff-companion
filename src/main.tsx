@@ -55,18 +55,18 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 }
 
-// Service worker disabled to prevent caching issues during development
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/sw.js')
-//       .then((registration) => {
-//         console.log('SW registered: ', registration);
-//       })
-//       .catch((registrationError) => {
-//         console.log('SW registration failed: ', registrationError);
-//       });
-//   });
-// }
+// Register Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('SW registered: ', registration);
+      })
+      .catch((registrationError) => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
 
 
 

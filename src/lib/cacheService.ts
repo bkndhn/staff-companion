@@ -192,7 +192,7 @@ export async function cachedFetch<T>(
 /**
  * Debounced save wrapper to reduce write operations
  */
-const saveTimers: Map<string, NodeJS.Timeout> = new Map();
+const saveTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
 export function debouncedSave(
     key: string,
