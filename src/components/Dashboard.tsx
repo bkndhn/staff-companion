@@ -294,7 +294,16 @@ const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-sm text-white/60 mb-3">Drag or use arrows to reorder locations:</p>
               <div className="space-y-2">
                 {locations.map((loc, index) => (
-                  <div key={loc.name} className="flex items-center gap-3 p-2 glass-card-static rounded-lg">
+                  <div
+                    key={loc.name}
+                    draggable
+                    onDragStart={() => handleLocDragStart(index)}
+                    onDragOver={(e) => handleLocDragOver(e, index)}
+                    onDrop={(e) => handleLocDrop(e, index)}
+                    onDragEnd={() => { setDragIndex(null); setDragOverIdx(null); }}
+                    className={`flex items-center gap-3 p-3 glass-card-static rounded-lg cursor-grab active:cursor-grabbing transition-all ${dragOverIdx === index ? 'ring-2 ring-indigo-400 scale-[1.02]' : ''} ${dragIndex === index ? 'opacity-50' : ''}`}
+                  >
+                    <GripVertical size={16} className="text-white/40 flex-shrink-0" />
                     <span className="text-sm font-medium flex-1">{loc.name}</span>
                     <button
                       onClick={() => moveLocation(index, 'up')}
