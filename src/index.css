@@ -2148,3 +2148,69 @@ body.light-theme td.sticky,
 body.light-theme th.sticky {
   background-color: #ffffff !important;
 }
+
+/* Light theme: Make edit/delete icon buttons visible in modals */
+body.light-theme .modal-content .text-blue-400 {
+  color: #2563eb !important;
+}
+
+body.light-theme .modal-content .text-red-400 {
+  color: #dc2626 !important;
+}
+
+body.light-theme .modal-content .text-emerald-400 {
+  color: #059669 !important;
+}
+
+body.light-theme .modal-content .text-purple-400 {
+  color: #7c3aed !important;
+}
+
+body.light-theme .modal-content .text-amber-400 {
+  color: #d97706 !important;
+}
+
+body.light-theme .modal-content .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .modal-content .text-white\/50 {
+  color: rgba(26, 26, 46, 0.5) !important;
+}
+
+body.light-theme .modal-content .text-white\/40 {
+  color: rgba(26, 26, 46, 0.4) !important;
+}
+
+body.light-theme .modal-content .text-white\/60 {
+  color: rgba(26, 26, 46, 0.6) !important;
+}
+
+body.light-theme .modal-content span.font-medium,
+body.light-theme .modal-content span.text-sm {
+  color: #1a1a2e !important;
+}
+
+/* Light theme: glass-card-static in modals */
+body.light-theme .modal-content .glass-card-static {
+  background: rgba(245, 247, 250, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light theme: Built-in badge visibility */
+body.light-theme .bg-blue-500\/20 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+body.light-theme .bg-red-500\/20 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+body.light-theme .bg-emerald-500\/20 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Light theme: dashboard reorder drag items */
+body.light-theme .cursor-grab .text-white\/40 {
+  color: rgba(26, 26, 46, 0.4) !important;
+}
