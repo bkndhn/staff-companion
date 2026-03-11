@@ -1,6 +1,6 @@
 import React from 'react';
 import { Staff, Attendance } from '../types';
-import { Users, Clock, Calendar, MapPin, TrendingUp, Sun, Moon, ArrowUp, ArrowDown } from 'lucide-react';
+import { Users, Clock, Calendar, MapPin, TrendingUp, Sun, Moon, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 import { calculateLocationAttendance } from '../utils/salaryCalculations';
 
 interface DashboardProps {
@@ -106,6 +106,9 @@ const Dashboard: React.FC<DashboardProps> = ({
     loadLocations();
   }, [activeStaff, todayAttendance, selectedDate, userRole, userLocation, locationOrder]);
 
+  const [dragIndex, setDragIndex] = React.useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = React.useState<number | null>(null);
+
   const moveLocation = (index: number, direction: 'up' | 'down') => {
     const names = locations.map(l => l.name);
     const newIndex = direction === 'up' ? index - 1 : index + 1;
@@ -113,6 +116,32 @@ const Dashboard: React.FC<DashboardProps> = ({
     [names[index], names[newIndex]] = [names[newIndex], names[index]];
     setLocationOrder(names);
     localStorage.setItem(LOCATION_ORDER_KEY, JSON.stringify(names));
+  };
+
+  const handleLocDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleLocDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIdx(index);
+  };
+
+  const handleLocDrop = (e: React.DragEvent, dropIdx: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === dropIdx) {
+      setDragIndex(null);
+      setDragOverIdx(null);
+      return;
+    }
+    const names = locations.map(l => l.name);
+    const [moved] = names.splice(dragIndex, 1);
+    names.splice(dropIdx, 0, moved);
+    setLocationOrder(names);
+    localStorage.setItem(LOCATION_ORDER_KEY, JSON.stringify(names));
+    setDragIndex(null);
+    setDragOverIdx(null);
   };
 
   const sortStaffIdsByOrder = (ids: string[]) => {
@@ -265,7 +294,16 @@ const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-sm text-white/60 mb-3">Drag or use arrows to reorder locations:</p>
               <div className="space-y-2">
                 {locations.map((loc, index) => (
-                  <div key={loc.name} className="flex items-center gap-3 p-2 glass-card-static rounded-lg">
+                  <div
+                    key={loc.name}
+                    draggable
+                    onDragStart={() => handleLocDragStart(index)}
+                    onDragOver={(e) => handleLocDragOver(e, index)}
+                    onDrop={(e) => handleLocDrop(e, index)}
+                    onDragEnd={() => { setDragIndex(null); setDragOverIdx(null); }}
+                    className={`flex items-center gap-3 p-3 glass-card-static rounded-lg cursor-grab active:cursor-grabbing transition-all ${dragOverIdx === index ? 'ring-2 ring-indigo-400 scale-[1.02]' : ''} ${dragIndex === index ? 'opacity-50' : ''}`}
+                  >
+                    <GripVertical size={16} className="text-white/40 flex-shrink-0" />
                     <span className="text-sm font-medium flex-1">{loc.name}</span>
                     <button
                       onClick={() => moveLocation(index, 'up')}
