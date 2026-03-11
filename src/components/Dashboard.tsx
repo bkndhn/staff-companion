@@ -106,6 +106,9 @@ const Dashboard: React.FC<DashboardProps> = ({
     loadLocations();
   }, [activeStaff, todayAttendance, selectedDate, userRole, userLocation, locationOrder]);
 
+  const [dragIndex, setDragIndex] = React.useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = React.useState<number | null>(null);
+
   const moveLocation = (index: number, direction: 'up' | 'down') => {
     const names = locations.map(l => l.name);
     const newIndex = direction === 'up' ? index - 1 : index + 1;
@@ -113,6 +116,32 @@ const Dashboard: React.FC<DashboardProps> = ({
     [names[index], names[newIndex]] = [names[newIndex], names[index]];
     setLocationOrder(names);
     localStorage.setItem(LOCATION_ORDER_KEY, JSON.stringify(names));
+  };
+
+  const handleLocDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleLocDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIdx(index);
+  };
+
+  const handleLocDrop = (e: React.DragEvent, dropIdx: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === dropIdx) {
+      setDragIndex(null);
+      setDragOverIdx(null);
+      return;
+    }
+    const names = locations.map(l => l.name);
+    const [moved] = names.splice(dragIndex, 1);
+    names.splice(dropIdx, 0, moved);
+    setLocationOrder(names);
+    localStorage.setItem(LOCATION_ORDER_KEY, JSON.stringify(names));
+    setDragIndex(null);
+    setDragOverIdx(null);
   };
 
   const sortStaffIdsByOrder = (ids: string[]) => {
