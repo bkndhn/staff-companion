@@ -2197,6 +2197,12 @@ body.light-theme .modal-content .glass-card-static {
   border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
+/* Light theme: keep action icons in location/category rows readable */
+body.light-theme .modal-content .glass-card-static button svg,
+body.light-theme .modal-content .glass-card-static button[class*="text-"] svg {
+  color: currentColor !important;
+}
+
 /* Light theme: Built-in badge visibility */
 body.light-theme .bg-blue-500\/20 {
   background-color: rgba(59, 130, 246, 0.15) !important;
