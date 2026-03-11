@@ -1,6 +1,6 @@
 import React from 'react';
 import { Staff, Attendance } from '../types';
-import { Users, Clock, Calendar, MapPin, TrendingUp, Sun, Moon, ArrowUp, ArrowDown } from 'lucide-react';
+import { Users, Clock, Calendar, MapPin, TrendingUp, Sun, Moon, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 import { calculateLocationAttendance } from '../utils/salaryCalculations';
 
 interface DashboardProps {
