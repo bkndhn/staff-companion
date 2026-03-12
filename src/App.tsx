@@ -167,7 +167,7 @@ function App() {
     await loadAllData();
   };
 
-  const handleLogin = (userData: { email: string; role: string; location?: string }) => {
+  const handleLogin = (userData: { email: string; role: string; location?: string; staffId?: string; staffName?: string }) => {
     setUser(userData as User);
   };
 
