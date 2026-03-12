@@ -20,6 +20,7 @@ const SalaryManagement = React.lazy(() => import('./components/SalaryManagement'
 const PartTimeStaff = React.lazy(() => import('./components/PartTimeStaff'));
 const OldStaffRecords = React.lazy(() => import('./components/OldStaffRecords'));
 const Settings = React.lazy(() => import('./components/Settings'));
+const StaffPortal = React.lazy(() => import('./components/StaffPortal'));
 
 // Loading fallback for lazy-loaded components
 const ComponentLoader = () => (
