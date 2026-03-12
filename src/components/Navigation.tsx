@@ -36,6 +36,11 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, user, 
   };
 
   const getAvailableTabs = () => {
+    if (user.role === 'staff') {
+      return [
+        { id: 'My Portal' as NavigationTab, label: 'My Portal', icon: Users },
+      ];
+    }
     if (user.role === 'admin') {
       return [
         { id: 'Dashboard' as NavigationTab, label: 'Dashboard', icon: BarChart3 },
