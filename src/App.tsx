@@ -750,14 +750,31 @@ function App() {
     const filteredAttendanceData = filteredAttendance;
 
     switch (activeTab) {
+      case 'My Portal':
+        if (user?.role === 'staff' && user.staffId) {
+          const portalStaff = staff.find(s => s.id === user.staffId);
+          if (!portalStaff) return <div className="p-8 text-center text-[var(--text-muted)]">Staff record not found.</div>;
+          return (
+            <Suspense fallback={<ComponentLoader />}>
+              <StaffPortal
+                staff={portalStaff}
+                attendance={attendance}
+                salaryHikes={salaryHikes}
+                advances={advances}
+                allStaff={staff}
+              />
+            </Suspense>
+          );
+        }
+        return null;
       case 'Dashboard':
         return (
           <Dashboard
-            staff={staff}  // Pass ALL staff for temp/guest calculations
-            attendance={attendance}  // Pass ALL attendance for temp/guest calculations
+            staff={staff}
+            attendance={attendance}
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
-            userRole={user?.role || 'manager'}
+            userRole={user?.role === 'staff' ? 'manager' : (user?.role || 'manager')}
             userLocation={user?.location || ''}
             isDarkTheme={isDarkTheme}
             toggleTheme={toggleTheme}
@@ -787,7 +804,7 @@ function App() {
             onDateChange={setSelectedDate}
             onUpdateAttendance={updateAttendance}
             onBulkUpdateAttendance={bulkUpdateAttendance}
-            userRole={user?.role || 'manager'}
+            userRole={user?.role === 'staff' ? 'manager' : (user?.role || 'manager')}
           />
         );
       case 'Salary Management':
