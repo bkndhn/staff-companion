@@ -95,9 +95,9 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, user, 
           <div className="flex items-center gap-4">
             <div className="text-right">
               <div className="text-sm font-medium text-white">
-                {user.role === 'admin' ? 'Administrator' : `${user.location} Manager`}
+                {user.role === 'admin' ? 'Administrator' : user.role === 'staff' ? (user.staffName || 'Staff') : `${user.location} Manager`}
               </div>
-              <div className="text-xs text-white/50">{user.email}</div>
+              <div className="text-xs text-white/50">{user.role === 'staff' ? 'Staff Portal' : user.email}</div>
             </div>
             <button
               onClick={handleLogoutClick}
