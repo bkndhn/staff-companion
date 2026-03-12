@@ -124,7 +124,9 @@ function App() {
   // Set default tab based on user role
   useEffect(() => {
     if (user) {
-      if (user.role === 'manager') {
+      if (user.role === 'staff') {
+        setActiveTab('My Portal');
+      } else if (user.role === 'manager') {
         setActiveTab('Attendance');
       } else {
         setActiveTab('Dashboard');
