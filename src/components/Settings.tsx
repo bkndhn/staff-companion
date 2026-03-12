@@ -147,6 +147,10 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [staffLoginEnabled, setStaffLoginEnabled] = useState(() => {
+        const saved = localStorage.getItem('staffLoginEnabled');
+        return saved !== 'false'; // default to true
+    });
 
 
     // Form state
