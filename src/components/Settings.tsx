@@ -147,6 +147,10 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [staffLoginEnabled, setStaffLoginEnabled] = useState(() => {
+        const saved = localStorage.getItem('staffLoginEnabled');
+        return saved !== 'false'; // default to true
+    });
 
 
     // Form state
@@ -344,6 +348,29 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
                     <h1 className="text-2xl md:text-3xl font-bold text-white">Settings</h1>
                     <p className="text-white/50 text-sm">Manage user accounts and access</p>
                 </div>
+            </div>
+
+            {/* Staff Self-Service Toggle */}
+            <div className="glass-card-static p-4 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                        <Users size={20} className="text-emerald-400" />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-[var(--text-primary)] text-sm">Staff Self-Service Login</h3>
+                        <p className="text-xs text-[var(--text-muted)]">Allow staff to log in and view their own records (salary, attendance, hikes)</p>
+                    </div>
+                </div>
+                <button
+                    onClick={() => {
+                        const newVal = !staffLoginEnabled;
+                        setStaffLoginEnabled(newVal);
+                        localStorage.setItem('staffLoginEnabled', String(newVal));
+                    }}
+                    className={`relative w-14 h-7 rounded-full transition-colors ${staffLoginEnabled ? 'bg-emerald-500' : 'bg-gray-500'}`}
+                >
+                    <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${staffLoginEnabled ? 'translate-x-7' : 'translate-x-0.5'}`} />
+                </button>
             </div>
 
             {/* Search and Add - Stacked on mobile */}

@@ -141,8 +141,10 @@ export interface SalaryHike {
 
 export interface User {
   email: string;
-  role: 'admin' | 'manager';
+  role: 'admin' | 'manager' | 'staff';
   location?: string;
+  staffId?: string;
+  staffName?: string;
 }
 
 export interface SalaryCategory {
@@ -164,7 +166,7 @@ export interface SalaryOverride {
   salarySupplementsOverride?: Record<string, number>;
 }
 
-export type NavigationTab = 'Dashboard' | 'Staff Management' | 'Attendance' | 'Salary Management' | 'Part-Time Staff' | 'Old Staff Records' | 'Settings';
+export type NavigationTab = 'Dashboard' | 'Staff Management' | 'Attendance' | 'Salary Management' | 'Part-Time Staff' | 'Old Staff Records' | 'Settings' | 'My Portal';
 
 // Re-export AppUser from userService
 export type { AppUser } from '../services/userService';

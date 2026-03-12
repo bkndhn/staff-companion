@@ -36,6 +36,11 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, user, 
   };
 
   const getAvailableTabs = () => {
+    if (user.role === 'staff') {
+      return [
+        { id: 'My Portal' as NavigationTab, label: 'My Portal', icon: Users },
+      ];
+    }
     if (user.role === 'admin') {
       return [
         { id: 'Dashboard' as NavigationTab, label: 'Dashboard', icon: BarChart3 },
@@ -90,9 +95,9 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, user, 
           <div className="flex items-center gap-4">
             <div className="text-right">
               <div className="text-sm font-medium text-white">
-                {user.role === 'admin' ? 'Administrator' : `${user.location} Manager`}
+                {user.role === 'admin' ? 'Administrator' : user.role === 'staff' ? (user.staffName || 'Staff') : `${user.location} Manager`}
               </div>
-              <div className="text-xs text-white/50">{user.email}</div>
+              <div className="text-xs text-white/50">{user.role === 'staff' ? 'Staff Portal' : user.email}</div>
             </div>
             <button
               onClick={handleLogoutClick}
@@ -112,14 +117,14 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, user, 
             Staff Management
           </h1>
           <div className="flex items-center gap-2">
-            <div className="text-right">
-              <div className="text-[10px] font-bold text-white/40 uppercase tracking-tight">
-                {user.role === 'admin' ? 'Role' : 'Location'}
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-white/40 uppercase tracking-tight">
+                  {user.role === 'admin' ? 'Role' : user.role === 'staff' ? 'Staff' : 'Location'}
+                </div>
+                <div className="text-xs font-semibold text-white">
+                  {user.role === 'admin' ? 'Admin' : user.role === 'staff' ? (user.staffName || 'Staff') : user.location}
+                </div>
               </div>
-              <div className="text-xs font-semibold text-white">
-                {user.role === 'admin' ? 'Admin' : user.location}
-              </div>
-            </div>
             <button
               onClick={handleLogoutClick}
               className="p-2 text-white/50 hover:text-red-400 rounded-lg transition-all duration-200 active:scale-90 bg-red-500/10"

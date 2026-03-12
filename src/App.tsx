@@ -20,6 +20,7 @@ const SalaryManagement = React.lazy(() => import('./components/SalaryManagement'
 const PartTimeStaff = React.lazy(() => import('./components/PartTimeStaff'));
 const OldStaffRecords = React.lazy(() => import('./components/OldStaffRecords'));
 const Settings = React.lazy(() => import('./components/Settings'));
+const StaffPortal = React.lazy(() => import('./components/StaffPortal'));
 
 // Loading fallback for lazy-loaded components
 const ComponentLoader = () => (
@@ -123,7 +124,9 @@ function App() {
   // Set default tab based on user role
   useEffect(() => {
     if (user) {
-      if (user.role === 'manager') {
+      if (user.role === 'staff') {
+        setActiveTab('My Portal');
+      } else if (user.role === 'manager') {
         setActiveTab('Attendance');
       } else {
         setActiveTab('Dashboard');
@@ -164,7 +167,7 @@ function App() {
     await loadAllData();
   };
 
-  const handleLogin = (userData: { email: string; role: string; location?: string }) => {
+  const handleLogin = (userData: { email: string; role: string; location?: string; staffId?: string; staffName?: string }) => {
     setUser(userData as User);
   };
 
@@ -747,14 +750,31 @@ function App() {
     const filteredAttendanceData = filteredAttendance;
 
     switch (activeTab) {
+      case 'My Portal':
+        if (user?.role === 'staff' && user.staffId) {
+          const portalStaff = staff.find(s => s.id === user.staffId);
+          if (!portalStaff) return <div className="p-8 text-center text-[var(--text-muted)]">Staff record not found.</div>;
+          return (
+            <Suspense fallback={<ComponentLoader />}>
+              <StaffPortal
+                staff={portalStaff}
+                attendance={attendance}
+                salaryHikes={salaryHikes}
+                advances={advances}
+                allStaff={staff}
+              />
+            </Suspense>
+          );
+        }
+        return null;
       case 'Dashboard':
         return (
           <Dashboard
-            staff={staff}  // Pass ALL staff for temp/guest calculations
-            attendance={attendance}  // Pass ALL attendance for temp/guest calculations
+            staff={staff}
+            attendance={attendance}
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
-            userRole={user?.role || 'manager'}
+            userRole={user?.role === 'staff' ? 'manager' : (user?.role || 'manager')}
             userLocation={user?.location || ''}
             isDarkTheme={isDarkTheme}
             toggleTheme={toggleTheme}
@@ -784,7 +804,7 @@ function App() {
             onDateChange={setSelectedDate}
             onUpdateAttendance={updateAttendance}
             onBulkUpdateAttendance={bulkUpdateAttendance}
-            userRole={user?.role || 'manager'}
+            userRole={user?.role === 'staff' ? 'manager' : (user?.role || 'manager')}
           />
         );
       case 'Salary Management':
