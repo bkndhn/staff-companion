@@ -236,50 +236,73 @@ body.light-theme button.bg-gray-700 {
   color: #1a1a2e !important;
 }
 
-/* Light theme badge overrides */
-body.light-theme .badge-success,
-body.light-theme .text-green-500,
-body.light-theme .text-green-400 {
+/* Light theme badge overrides (badges only - with background) */
+body.light-theme .badge-success {
   background-color: rgba(16, 185, 129, 0.1) !important;
   color: #047857 !important;
-  /* darker green */
   border-color: rgba(16, 185, 129, 0.2) !important;
 }
 
-body.light-theme .badge-warning,
-body.light-theme .text-yellow-500,
-body.light-theme .text-amber-400 {
+body.light-theme .badge-warning {
   background-color: rgba(245, 158, 11, 0.1) !important;
   color: #b45309 !important;
-  /* darker amber */
   border-color: rgba(245, 158, 11, 0.2) !important;
 }
 
-body.light-theme .badge-danger,
-body.light-theme .text-red-500,
-body.light-theme .text-red-400 {
+body.light-theme .badge-danger {
   background-color: rgba(239, 68, 68, 0.1) !important;
   color: #b91c1c !important;
-  /* darker red */
   border-color: rgba(239, 68, 68, 0.2) !important;
 }
 
-body.light-theme .badge-info,
-body.light-theme .text-blue-500,
-body.light-theme .text-blue-400 {
+body.light-theme .badge-info {
   background-color: rgba(59, 130, 246, 0.1) !important;
   color: #1d4ed8 !important;
-  /* darker blue */
   border-color: rgba(59, 130, 246, 0.2) !important;
 }
 
-body.light-theme .badge-purple,
-body.light-theme .text-purple-500,
-body.light-theme .text-purple-400 {
+body.light-theme .badge-purple {
   background-color: rgba(139, 92, 246, 0.1) !important;
   color: #6d28d9 !important;
-  /* darker purple */
   border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Light theme text color overrides (text only - no background) */
+body.light-theme .text-green-500,
+body.light-theme .text-green-400 { color: #047857 !important; }
+body.light-theme .text-emerald-500,
+body.light-theme .text-emerald-400,
+body.light-theme .text-emerald-600 { color: #047857 !important; }
+body.light-theme .text-yellow-500,
+body.light-theme .text-amber-400,
+body.light-theme .text-amber-500,
+body.light-theme .text-amber-600 { color: #b45309 !important; }
+body.light-theme .text-orange-500,
+body.light-theme .text-orange-600 { color: #c2410c !important; }
+body.light-theme .text-red-500,
+body.light-theme .text-red-400,
+body.light-theme .text-red-600 { color: #b91c1c !important; }
+body.light-theme .text-blue-500,
+body.light-theme .text-blue-400,
+body.light-theme .text-blue-600 { color: #1d4ed8 !important; }
+body.light-theme .text-purple-500,
+body.light-theme .text-purple-400,
+body.light-theme .text-purple-600 { color: #6d28d9 !important; }
+body.light-theme .text-indigo-400,
+body.light-theme .text-indigo-500,
+body.light-theme .text-indigo-600 { color: #4338ca !important; }
+
+/* Preserve white text inside gradient containers */
+body.light-theme [class*="from-indigo-5"] .text-white,
+body.light-theme [class*="from-emerald-5"] .text-white,
+body.light-theme [class*="from-emerald-5"] span,
+body.light-theme [class*="from-indigo-5"] span,
+body.light-theme [class*="from-indigo-5"] p,
+body.light-theme .bg-indigo-600 svg,
+body.light-theme .bg-indigo-600 span,
+body.light-theme .bg-red-600 svg,
+body.light-theme .bg-red-600 span {
+  color: #ffffff !important;
 }
 
 /* Fix for light theme specific text colors in tables/cards */
