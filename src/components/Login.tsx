@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock, AlertCircle, Eye, EyeOff, Sparkles, Users, ShieldCheck } from 'lucide-react';
 import {
   isRateLimited,
@@ -16,7 +16,8 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [loginMode, setLoginMode] = useState<'admin' | 'staff'>('admin');
+  const staffLoginEnabled = localStorage.getItem('staffLoginEnabled') !== 'false';
+  const [loginMode, setLoginMode] = useState<'admin' | 'staff'>(staffLoginEnabled ? 'staff' : 'admin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
@@ -34,6 +35,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     if (!isValidEmail(sanitizedEmail)) {
       setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError('Please enter your password');
       setLoading(false);
       return;
     }
@@ -72,7 +79,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         });
       } else {
         const result = recordFailedAttempt(sanitizedEmail);
-        setError(result.message);
+        setError('Invalid email address or password. Please check and try again.');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -103,8 +110,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
 
     // Check if staff login is enabled
-    const staffLoginEnabled = localStorage.getItem('staffLoginEnabled');
-    if (staffLoginEnabled === 'false') {
+    const staffLoginEnabledNow = localStorage.getItem('staffLoginEnabled');
+    if (staffLoginEnabledNow === 'false') {
       setError('Staff login is currently disabled by admin');
       setLoading(false);
       return;
@@ -121,7 +128,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         .eq('is_active', true);
 
       if (fetchError || !staffData || staffData.length === 0) {
-        setError('Invalid credentials. Please check your mobile number.');
+        setError('Invalid mobile number or joined date. Please check your credentials.');
         setLoading(false);
         return;
       }
@@ -130,15 +137,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const enteredDay = trimmedDate.substring(0, 2);
       const enteredMonth = trimmedDate.substring(2, 4);
       const enteredYear = trimmedDate.substring(4, 8);
-      const enteredDateStr = `${enteredYear}-${enteredMonth}-${enteredDay}`;
 
       // Find matching staff by joined date
       const matchedStaff = staffData.find(s => {
-        // joined_date could be various formats, normalize
         const jd = s.joined_date;
         if (!jd) return false;
 
-        // Try parsing the joined date
         const joinedParsed = new Date(jd);
         if (isNaN(joinedParsed.getTime())) return false;
 
@@ -150,7 +154,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       });
 
       if (!matchedStaff) {
-        setError('Invalid credentials. Please check your joined date (DDMMYYYY).');
+        setError('Invalid mobile number or joined date. Please check your credentials.');
         setLoading(false);
         return;
       }
@@ -206,33 +210,35 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <p className="text-[var(--text-muted)]">Sign in to your account</p>
           </div>
 
-          {/* Login Mode Toggle */}
-          <div className="flex gap-2 mb-6 p-1 rounded-xl bg-[var(--glass-bg)]">
-            <button
-              type="button"
-              onClick={() => { setLoginMode('admin'); setError(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                loginMode === 'admin'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              <ShieldCheck size={16} />
-              Admin / Manager
-            </button>
-            <button
-              type="button"
-              onClick={() => { setLoginMode('staff'); setError(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                loginMode === 'staff'
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              <Users size={16} />
-              Staff
-            </button>
-          </div>
+          {/* Login Mode Toggle - only show if staff login is enabled */}
+          {staffLoginEnabled ? (
+            <div className="flex gap-2 mb-6 p-1 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+              <button
+                type="button"
+                onClick={() => { setLoginMode('admin'); setError(''); }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  loginMode === 'admin'
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <ShieldCheck size={16} />
+                Admin / Manager
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLoginMode('staff'); setError(''); }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  loginMode === 'staff'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Users size={16} />
+                Staff
+              </button>
+            </div>
+          ) : null}
 
           {/* Admin Login Form */}
           {loginMode === 'admin' && (
@@ -271,9 +277,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </div>
 
               {error && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
-                  <AlertCircle className="text-red-400 flex-shrink-0" size={20} />
-                  <span className="text-red-400 text-sm">{error}</span>
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+                  <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-red-600 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{error}</span>
                 </div>
               )}
 
@@ -321,9 +327,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </div>
 
               {error && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
-                  <AlertCircle className="text-red-400 flex-shrink-0" size={20} />
-                  <span className="text-red-400 text-sm">{error}</span>
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+                  <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={18} />
+                  <span className="text-red-600 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{error}</span>
                 </div>
               )}
 
