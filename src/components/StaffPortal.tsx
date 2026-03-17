@@ -266,7 +266,7 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
             </span>
             <button
               onClick={() => navigateMonth(1)}
-              disabled={isMonthBlocked && (() => { const n = new Date(); const nm = selectedMonth + 1 > 11 ? 0 : selectedMonth + 1; const ny = selectedMonth + 1 > 11 ? selectedYear + 1 : selectedYear; return ny > n.getFullYear() || (ny === n.getFullYear() && nm > n.getMonth()); })()}
+              disabled={isNextMonthFuture}
               className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronRight size={20} className="text-[var(--text-primary)]" />
