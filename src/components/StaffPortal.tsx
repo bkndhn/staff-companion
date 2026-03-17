@@ -508,11 +508,11 @@ const InfoRow: React.FC<{ icon: React.ElementType; label: string; value: string 
 const SalaryCard: React.FC<{ label: string; amount: number; highlight?: boolean }> = ({ label, amount, highlight }) => (
   <div className={`p-4 rounded-xl text-center border ${
     highlight 
-      ? 'bg-gradient-to-br from-indigo-500/10 to-purple-600/10 border-indigo-500/20' 
+      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 border-indigo-500/30 shadow-lg shadow-indigo-500/20' 
       : 'bg-[var(--glass-bg)] border-[var(--glass-border)]'
   }`}>
-    <p className="text-[11px] text-[var(--text-muted)] font-medium uppercase tracking-wide mb-1">{label}</p>
-    <p className={`text-lg font-bold ${highlight ? 'text-indigo-600' : 'text-[var(--text-primary)]'}`}>
+    <p className={`text-[11px] font-medium uppercase tracking-wide mb-1 ${highlight ? 'text-white/70' : 'text-[var(--text-muted)]'}`}>{label}</p>
+    <p className={`text-lg font-bold ${highlight ? 'text-white' : 'text-[var(--text-primary)]'}`}>
       Rs. {amount.toLocaleString('en-IN')}
     </p>
   </div>
