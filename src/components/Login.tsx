@@ -120,12 +120,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 300));
 
     try {
-      // Fetch staff with matching contact number
+      // Fetch staff with matching contact number (include inactive for past-data viewing)
       const { data: staffData, error: fetchError } = await supabase
         .from('staff')
         .select('*')
-        .eq('contact_number', trimmedMobile)
-        .eq('is_active', true);
+        .eq('contact_number', trimmedMobile);
 
       if (fetchError || !staffData || staffData.length === 0) {
         setError('Invalid mobile number or joined date. Please check your credentials.');

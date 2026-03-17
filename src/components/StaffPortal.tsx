@@ -26,6 +26,32 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
 
   const monthName = new Date(selectedYear, selectedMonth).toLocaleString('default', { month: 'long' });
 
+  // Determine if staff has left (inactive) and their last working month
+  const isLeftStaff = !staff.isActive;
+
+  // Check if the selected month is in the future relative to current date (or left date for inactive staff)
+  const isMonthBlocked = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    // For active staff, block future months
+    if (!isLeftStaff) {
+      return selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth);
+    }
+
+    // For left staff, block months after current (they can't see future data)
+    return selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth);
+  }, [selectedMonth, selectedYear, isLeftStaff]);
+
+  // Check if next month would be in the future
+  const isNextMonthFuture = useMemo(() => {
+    const now = new Date();
+    const nm = selectedMonth + 1 > 11 ? 0 : selectedMonth + 1;
+    const ny = selectedMonth + 1 > 11 ? selectedYear + 1 : selectedYear;
+    return ny > now.getFullYear() || (ny === now.getFullYear() && nm > now.getMonth());
+  }, [selectedMonth, selectedYear]);
+
   // Load salary overrides for the selected month
   useEffect(() => {
     const loadOverrides = async () => {
@@ -97,6 +123,13 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     let y = selectedYear;
     if (m < 0) { m = 11; y--; }
     if (m > 11) { m = 0; y++; }
+
+    // Block navigating to future months
+    const now = new Date();
+    if (y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth())) {
+      return; // Don't navigate to future
+    }
+
     setSelectedMonth(m);
     setSelectedYear(y);
   };
@@ -223,16 +256,27 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
 
       {/* Month Navigator (for attendance & salary) */}
       {(activeSection === 'attendance' || activeSection === 'salary') && (
-        <div className="flex items-center justify-center gap-4 py-2">
-          <button onClick={() => navigateMonth(-1)} className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95">
-            <ChevronLeft size={20} className="text-[var(--text-primary)]" />
-          </button>
-          <span className="text-lg font-bold text-[var(--text-primary)] min-w-[180px] text-center">
-            {monthName} {selectedYear}
-          </span>
-          <button onClick={() => navigateMonth(1)} className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95">
-            <ChevronRight size={20} className="text-[var(--text-primary)]" />
-          </button>
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-4 py-2">
+            <button onClick={() => navigateMonth(-1)} className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95">
+              <ChevronLeft size={20} className="text-[var(--text-primary)]" />
+            </button>
+            <span className="text-lg font-bold text-[var(--text-primary)] min-w-[180px] text-center">
+              {monthName} {selectedYear}
+            </span>
+            <button
+              onClick={() => navigateMonth(1)}
+              disabled={isNextMonthFuture}
+              className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={20} className="text-[var(--text-primary)]" />
+            </button>
+          </div>
+          {isLeftStaff && (
+            <p className="text-center text-xs text-amber-600 font-medium bg-amber-500/10 rounded-lg py-2 px-3 border border-amber-500/20">
+              ⚠ You are no longer active. Only past records are shown.
+            </p>
+          )}
         </div>
       )}
 
@@ -483,11 +527,11 @@ const InfoRow: React.FC<{ icon: React.ElementType; label: string; value: string 
 const SalaryCard: React.FC<{ label: string; amount: number; highlight?: boolean }> = ({ label, amount, highlight }) => (
   <div className={`p-4 rounded-xl text-center border ${
     highlight 
-      ? 'bg-gradient-to-br from-indigo-500/10 to-purple-600/10 border-indigo-500/20' 
+      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 border-indigo-500/30 shadow-lg shadow-indigo-500/20' 
       : 'bg-[var(--glass-bg)] border-[var(--glass-border)]'
   }`}>
-    <p className="text-[11px] text-[var(--text-muted)] font-medium uppercase tracking-wide mb-1">{label}</p>
-    <p className={`text-lg font-bold ${highlight ? 'text-indigo-600' : 'text-[var(--text-primary)]'}`}>
+    <p className={`text-[11px] font-medium uppercase tracking-wide mb-1 ${highlight ? 'text-white/70' : 'text-[var(--text-muted)]'}`}>{label}</p>
+    <p className={`text-lg font-bold ${highlight ? 'text-white' : 'text-[var(--text-primary)]'}`}>
       Rs. {amount.toLocaleString('en-IN')}
     </p>
   </div>

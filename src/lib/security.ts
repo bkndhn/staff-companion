@@ -16,17 +16,17 @@ const SECURITY_CONFIG = {
 };
 
 /**
- * Simple hash function for password comparison
- * Note: In production, use bcrypt or argon2 on the backend
+ * @deprecated - simpleHash is only kept for reference. All password hashing
+ * is now handled server-side via bcrypt in the auth-login Edge Function.
+ * Do NOT use this for any password operations.
  */
 export function simpleHash(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
+        hash = hash & hash;
     }
-    // Add salt based on string length for extra security
     const salt = str.length * 17 + 42;
     return Math.abs(hash + salt).toString(36);
 }
