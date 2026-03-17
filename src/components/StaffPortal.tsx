@@ -248,16 +248,27 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
 
       {/* Month Navigator (for attendance & salary) */}
       {(activeSection === 'attendance' || activeSection === 'salary') && (
-        <div className="flex items-center justify-center gap-4 py-2">
-          <button onClick={() => navigateMonth(-1)} className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95">
-            <ChevronLeft size={20} className="text-[var(--text-primary)]" />
-          </button>
-          <span className="text-lg font-bold text-[var(--text-primary)] min-w-[180px] text-center">
-            {monthName} {selectedYear}
-          </span>
-          <button onClick={() => navigateMonth(1)} className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95">
-            <ChevronRight size={20} className="text-[var(--text-primary)]" />
-          </button>
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-4 py-2">
+            <button onClick={() => navigateMonth(-1)} className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95">
+              <ChevronLeft size={20} className="text-[var(--text-primary)]" />
+            </button>
+            <span className="text-lg font-bold text-[var(--text-primary)] min-w-[180px] text-center">
+              {monthName} {selectedYear}
+            </span>
+            <button
+              onClick={() => navigateMonth(1)}
+              disabled={isMonthBlocked && (() => { const n = new Date(); const nm = selectedMonth + 1 > 11 ? 0 : selectedMonth + 1; const ny = selectedMonth + 1 > 11 ? selectedYear + 1 : selectedYear; return ny > n.getFullYear() || (ny === n.getFullYear() && nm > n.getMonth()); })()}
+              className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--glass-border)] hover:border-indigo-400/30 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={20} className="text-[var(--text-primary)]" />
+            </button>
+          </div>
+          {isLeftStaff && (
+            <p className="text-center text-xs text-amber-600 font-medium bg-amber-500/10 rounded-lg py-2 px-3 border border-amber-500/20">
+              ⚠ You are no longer active. Only past records are shown.
+            </p>
+          )}
         </div>
       )}
 
