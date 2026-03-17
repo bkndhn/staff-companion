@@ -36,8 +36,8 @@ CREATE POLICY "Allow authenticated update" ON app_users
 CREATE POLICY "Allow authenticated delete" ON app_users
     FOR DELETE USING (true);
 
--- Insert default admin user (password: Admin123)
--- You can change this password in the Settings page after first login
-INSERT INTO app_users (email, password_hash, full_name, role, location)
-VALUES ('admin@staffmanagement.com', '1oa9ph9', 'Administrator', 'admin', NULL)
-ON CONFLICT (email) DO NOTHING;
+-- IMPORTANT: Default admin user should be created via the auth-create-user Edge Function
+-- which properly bcrypt-hashes the password. Do NOT store plaintext or weak hashes here.
+-- To set up the initial admin, use the Edge Function or Supabase dashboard.
+-- Example (run once via Edge Function):
+--   POST /functions/v1/auth-create-user { "email": "admin@staffmanagement.com", "password": "<strong-password>", "full_name": "Administrator", "role": "admin" }
