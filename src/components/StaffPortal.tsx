@@ -26,6 +26,24 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
 
   const monthName = new Date(selectedYear, selectedMonth).toLocaleString('default', { month: 'long' });
 
+  // Determine if staff has left (inactive) and their last working month
+  const isLeftStaff = !staff.isActive;
+
+  // Check if the selected month is in the future relative to current date (or left date for inactive staff)
+  const isMonthBlocked = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    // For active staff, block future months
+    if (!isLeftStaff) {
+      return selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth);
+    }
+
+    // For left staff, block months after current (they can't see future data)
+    return selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth);
+  }, [selectedMonth, selectedYear, isLeftStaff]);
+
   // Load salary overrides for the selected month
   useEffect(() => {
     const loadOverrides = async () => {
