@@ -115,6 +115,13 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     let y = selectedYear;
     if (m < 0) { m = 11; y--; }
     if (m > 11) { m = 0; y++; }
+
+    // Block navigating to future months
+    const now = new Date();
+    if (y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth())) {
+      return; // Don't navigate to future
+    }
+
     setSelectedMonth(m);
     setSelectedYear(y);
   };
