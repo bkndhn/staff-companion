@@ -44,6 +44,14 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     return selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth);
   }, [selectedMonth, selectedYear, isLeftStaff]);
 
+  // Check if next month would be in the future
+  const isNextMonthFuture = useMemo(() => {
+    const now = new Date();
+    const nm = selectedMonth + 1 > 11 ? 0 : selectedMonth + 1;
+    const ny = selectedMonth + 1 > 11 ? selectedYear + 1 : selectedYear;
+    return ny > now.getFullYear() || (ny === now.getFullYear() && nm > now.getMonth());
+  }, [selectedMonth, selectedYear]);
+
   // Load salary overrides for the selected month
   useEffect(() => {
     const loadOverrides = async () => {
