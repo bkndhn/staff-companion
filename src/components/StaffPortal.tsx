@@ -7,6 +7,7 @@ import {
 import { Staff, Attendance, SalaryHike, AdvanceDeduction, SalaryOverride } from '../types';
 import { calculateAttendanceMetrics, calculateSalary, getDaysInMonth, isSunday, roundToNearest10 } from '../utils/salaryCalculations';
 import { salaryOverrideService } from '../services/salaryOverrideService';
+import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -23,6 +24,7 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [overrides, setOverrides] = useState<SalaryOverride | null>(null);
+  const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>([]);
 
   const monthName = new Date(selectedYear, selectedMonth).toLocaleString('default', { month: 'long' });
 
@@ -66,6 +68,12 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     loadOverrides();
   }, [selectedMonth, selectedYear, staff.id]);
 
+  useEffect(() => {
+    salaryCategoryService.getCategories()
+      .then(setSalaryCategories)
+      .catch((err) => console.error('Error loading salary categories in staff portal:', err));
+  }, []);
+
   // Attendance metrics for selected month
   const metrics = useMemo(() =>
     calculateAttendanceMetrics(staff.id, attendance, selectedYear, selectedMonth),
@@ -81,6 +89,37 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     [staff.id, attendance, selectedMonth, selectedYear]
   );
 
+  const activeCustomCategories = useMemo(
+    () => salaryCategories.filter(c => !c.isBuiltIn && !c.isDeleted),
+    [salaryCategories]
+  );
+
+  const categoryLabels = useMemo(() => ({
+    basic: salaryCategories.find(c => c.id === 'basic')?.name || 'Basic',
+    incentive: salaryCategories.find(c => c.id === 'incentive')?.name || 'Incentive',
+    hra: salaryCategories.find(c => c.id === 'hra')?.name || 'HRA',
+    mealAllowance: salaryCategories.find(c => c.id === 'meal_allowance')?.name || 'Meal Allowance'
+  }), [salaryCategories]);
+
+  const effectiveSupplements = useMemo(() => {
+    const base = staff.salarySupplements || {};
+    const overrideSupplements = overrides?.salarySupplementsOverride || {};
+
+    return activeCustomCategories
+      .map(cat => {
+        const amount = Number(
+          (overrideSupplements as any)[cat.key] ??
+          (overrideSupplements as any)[cat.id] ??
+          (base as any)[cat.key] ??
+          (base as any)[cat.id] ??
+          0
+        );
+
+        return { key: cat.id, name: cat.name, amount };
+      })
+      .filter(item => item.amount > 0);
+  }, [activeCustomCategories, overrides?.salarySupplementsOverride, staff.salarySupplements]);
+
   // Salary for selected month - with overrides applied
   const salaryDetail = useMemo(() => {
     const adv = advances.find(a => a.staffId === staff.id && a.month === selectedMonth && a.year === selectedYear) || null;
@@ -93,9 +132,10 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
       const hra = overrides.hraOverride ?? baseDetail.hraEarned;
       const meal = overrides.mealAllowanceOverride ?? baseDetail.mealAllowance;
       const sundayPenalty = overrides.sundayPenaltyOverride ?? baseDetail.sundayPenalty;
+      const supplementsTotal = effectiveSupplements.reduce((sum, item) => sum + item.amount, 0);
 
-      const gross = roundToNearest10(basic + incentive + hra + meal);
-      const net = roundToNearest10(gross - baseDetail.deduction - sundayPenalty);
+      const gross = roundToNearest10(basic + incentive + hra + meal + supplementsTotal);
+      const net = roundToNearest10(gross - baseDetail.curAdv - baseDetail.deduction - sundayPenalty);
 
       return {
         ...baseDetail,
@@ -110,7 +150,7 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     }
 
     return baseDetail;
-  }, [staff, metrics, advances, attendance, selectedMonth, selectedYear, overrides]);
+  }, [staff, metrics, advances, attendance, selectedMonth, selectedYear, overrides, effectiveSupplements]);
 
   // Staff hikes
   const staffHikes = useMemo(() =>
@@ -186,6 +226,9 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     if (salaryDetail.mealAllowance > 0) {
       earningsRows.push(['Meal Allowance', `${rs} ${salaryDetail.mealAllowance.toLocaleString('en-IN')}`]);
     }
+    effectiveSupplements.forEach(item => {
+      earningsRows.push([item.name, `${rs} ${item.amount.toLocaleString('en-IN')}`]);
+    });
     earningsRows.push(
       ['Gross Salary', `${rs} ${salaryDetail.grossSalary.toLocaleString('en-IN')}`],
     );
@@ -310,12 +353,12 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
               <IndianRupee size={20} className="text-indigo-500" /> Current Salary Structure
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <SalaryCard label="Basic" amount={staff.basicSalary} />
-              <SalaryCard label="Incentive" amount={staff.incentive} />
-              <SalaryCard label="HRA" amount={staff.hra} />
-              {(staff.mealAllowance || 0) > 0 && <SalaryCard label="Meal Allow." amount={staff.mealAllowance!} />}
-              {staff.salarySupplements && Object.entries(staff.salarySupplements).map(([k, v]) => (
-                <SalaryCard key={k} label={k} amount={v} />
+              <SalaryCard label={categoryLabels.basic} amount={staff.basicSalary} />
+              <SalaryCard label={categoryLabels.incentive} amount={staff.incentive} />
+              <SalaryCard label={categoryLabels.hra} amount={staff.hra} />
+              {(staff.mealAllowance || 0) > 0 && <SalaryCard label={categoryLabels.mealAllowance} amount={staff.mealAllowance!} />}
+              {effectiveSupplements.map((item) => (
+                <SalaryCard key={item.key} label={item.name} amount={item.amount} />
               ))}
             </div>
             <div className="mt-3">
@@ -347,29 +390,69 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
           {/* Day-by-day */}
           <div className="bg-[var(--bg-card)] border border-[var(--glass-border)] rounded-2xl overflow-hidden shadow-[var(--shadow-soft)]">
             <div className="p-4 border-b border-[var(--glass-border)]">
-              <h3 className="font-bold text-[var(--text-primary)]">Daily Attendance</h3>
+              <h3 className="font-bold text-[var(--text-primary)]">Monthly Attendance View</h3>
             </div>
-            <div className="max-h-[400px] overflow-y-auto">
+            <div className="overflow-x-auto p-3">
               {(() => {
                 const daysInMonth = getDaysInMonth(selectedYear, selectedMonth);
-                const days = [];
-                for (let d = 1; d <= daysInMonth; d++) {
-                  const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                  const record = monthlyAttendance.find(a => a.date === dateStr);
-                  const isSun = isSunday(dateStr);
-                  const dayName = new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short' });
-                  const isPast = new Date(dateStr) <= new Date();
-                  days.push(
-                    <div key={d} className={`flex items-center justify-between px-4 py-3 border-b border-[var(--glass-border)] last:border-0 ${isSun ? 'bg-orange-500/5' : ''}`}>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono text-[var(--text-muted)] w-8">{String(d).padStart(2, '0')}</span>
-                        <span className={`text-sm font-medium ${isSun ? 'text-orange-600' : 'text-[var(--text-primary)]'}`}>{dayName}</span>
-                      </div>
-                      <StatusBadge status={record?.status || (!isPast ? 'future' : 'Absent')} />
-                    </div>
-                  );
-                }
-                return days;
+                const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                const total = (metrics.presentDays + (metrics.halfDays * 0.5)).toFixed(1).replace('.0', '');
+
+                return (
+                  <table className="w-full min-w-[760px]">
+                    <thead>
+                      <tr className="bg-[var(--glass-bg)]">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[var(--text-muted)] uppercase">Name</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-emerald-600 bg-emerald-500/10">P</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-amber-600 bg-amber-500/10">H</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-red-600 bg-red-500/10">A</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-orange-600 bg-orange-500/10">SUN</th>
+                        <th className="px-2 py-2 text-center text-xs font-semibold text-blue-600 bg-blue-500/10">TOTAL</th>
+                        {days.map(day => {
+                          const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                          const sun = isSunday(dateStr);
+                          return (
+                            <th key={day} className={`px-2 py-2 text-center text-xs font-semibold ${sun ? 'text-red-600 bg-red-500/10' : 'text-[var(--text-muted)]'}`}>
+                              {day}
+                              {sun && <div className="text-[10px]">Sun</div>}
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-t border-[var(--glass-border)]">
+                        <td className="px-3 py-3 text-sm font-semibold text-[var(--text-primary)]">{staff.name}</td>
+                        <td className="px-2 py-3 text-center text-sm font-bold text-emerald-600 bg-emerald-500/5">{metrics.presentDays}</td>
+                        <td className="px-2 py-3 text-center text-sm font-bold text-amber-600 bg-amber-500/5">{metrics.halfDays}</td>
+                        <td className="px-2 py-3 text-center text-sm font-bold text-red-600 bg-red-500/5">{metrics.leaveDays}</td>
+                        <td className="px-2 py-3 text-center text-sm font-bold text-orange-600 bg-orange-500/5">{metrics.sundayAbsents}</td>
+                        <td className="px-2 py-3 text-center text-sm font-bold text-blue-600 bg-blue-500/5">{total}</td>
+                        {days.map(day => {
+                          const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                          const record = monthlyAttendance.find(a => a.date === dateStr);
+                          const status = record?.status || 'Absent';
+                          const isSun = isSunday(dateStr);
+                          const halfCode = record?.shift === 'Morning' ? 'HM' : record?.shift === 'Evening' ? 'HE' : 'H';
+
+                          return (
+                            <td key={day} className={`px-2 py-3 text-center ${isSun ? 'bg-red-500/5' : ''}`} title={status === 'Half Day' ? `Half Day (${record?.shift || 'N/A'})` : status}>
+                              <span className={`inline-flex items-center justify-center min-w-[26px] h-6 rounded text-[10px] font-bold ${
+                                status === 'Present'
+                                  ? 'bg-emerald-500 text-white'
+                                  : status === 'Half Day'
+                                    ? 'bg-amber-500 text-white'
+                                    : 'bg-red-500 text-white'
+                                }`}>
+                                {status === 'Present' ? 'P' : status === 'Half Day' ? halfCode : 'A'}
+                              </span>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    </tbody>
+                  </table>
+                );
               })()}
             </div>
           </div>
@@ -527,7 +610,7 @@ const InfoRow: React.FC<{ icon: React.ElementType; label: string; value: string 
 const SalaryCard: React.FC<{ label: string; amount: number; highlight?: boolean }> = ({ label, amount, highlight }) => (
   <div className={`p-4 rounded-xl text-center border ${
     highlight 
-      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 border-indigo-500/30 shadow-lg shadow-indigo-500/20' 
+      ? 'salary-highlight-card bg-gradient-to-r from-indigo-500 to-purple-600 border-indigo-500/30 shadow-lg shadow-indigo-500/20' 
       : 'bg-[var(--glass-bg)] border-[var(--glass-border)]'
   }`}>
     <p className={`text-[11px] font-medium uppercase tracking-wide mb-1 ${highlight ? 'text-white/70' : 'text-[var(--text-muted)]'}`}>{label}</p>
