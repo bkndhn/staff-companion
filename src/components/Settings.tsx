@@ -515,8 +515,8 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
 
             {/* Add/Edit Modal */}
             {showAddModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content max-w-lg">
+                <div className="modal-overlay" onClick={() => { setShowAddModal(false); resetForm(); }}>
+                    <div className="modal-content max-w-lg" onClick={(e) => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             {editingUser ? <Edit2 size={20} /> : <Plus size={20} />}
                             {editingUser ? 'Edit User' : 'Add New User'}
@@ -615,8 +615,8 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
             {/* Delete Confirmation Modal */}
             {
                 showDeleteModal && (
-                    <div className="modal-overlay">
-                        <div className="modal-content">
+                    <div className="modal-overlay" onClick={() => setShowDeleteModal(null)}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                                 <Trash2 className="text-red-400" size={20} />
                                 Delete User
