@@ -28,8 +28,8 @@ const CredentialsModal: React.FC<CredentialsModalProps> = ({ credentials, locati
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content max-w-md">
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
                 <div className="text-center mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center">
                         <Check className="text-white" size={32} />
