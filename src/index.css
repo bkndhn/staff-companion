@@ -2243,3 +2243,72 @@ body.light-theme .bg-emerald-500\/20 {
 body.light-theme .cursor-grab .text-white\/40 {
   color: rgba(26, 26, 46, 0.4) !important;
 }
+
+/* ============================================
+   LIGHT THEME: ICON VISIBILITY IN BUTTONS
+   Export Excel, Close, X buttons, action icons
+   ============================================ */
+
+/* Light theme: SVG icons inside non-gradient buttons must be dark */
+body.light-theme button svg {
+  color: currentColor !important;
+}
+
+/* Light theme: close/X buttons with hover:bg-white/20 */
+body.light-theme button[class*="hover:bg-white"] svg {
+  color: #1a1a2e !important;
+}
+
+/* EXCEPTION: Keep white icons inside gradient buttons and colored bg buttons */
+body.light-theme .btn-premium svg,
+body.light-theme .btn-premium-success svg,
+body.light-theme .btn-premium-danger svg,
+body.light-theme [class*="bg-gradient"] button svg,
+body.light-theme button[class*="bg-indigo-6"] svg,
+body.light-theme button[class*="bg-red-6"] svg,
+body.light-theme button[class*="bg-green-6"] svg,
+body.light-theme button[class*="bg-emerald-6"] svg,
+body.light-theme button.bg-\[\#25D366\] svg,
+body.light-theme .nav-tab-active svg,
+body.light-theme .mobile-nav-item-active svg {
+  color: #ffffff !important;
+}
+
+/* Light theme: Export Excel button inside gradient headers - already white bg */
+body.light-theme button[class*="bg-white"][class*="text-orange"] svg {
+  color: #ea580c !important;
+}
+
+/* Light theme: Close/X icons in modal headers and card headers */
+body.light-theme .text-white\/50:hover svg,
+body.light-theme button.text-white\/50 svg {
+  color: rgba(26, 26, 46, 0.5) !important;
+}
+
+/* Light theme: btn-ghost icons */
+body.light-theme .btn-ghost svg {
+  color: #1a1a2e !important;
+}
+
+/* Light theme: Action icons in tables (edit, delete, archive) */
+body.light-theme button[class*="text-blue-6"] svg {
+  color: #2563eb !important;
+}
+
+body.light-theme button[class*="text-red-6"] svg {
+  color: #dc2626 !important;
+}
+
+/* Light theme: Ensure stat-icon SVGs stay their accent color */
+body.light-theme .stat-icon svg {
+  color: inherit !important;
+}
+
+/* Light theme: Download/export button icons */
+body.light-theme button[class*="text-indigo-6"] svg {
+  color: #4338ca !important;
+}
+
+body.light-theme button[class*="text-emerald"] svg {
+  color: #059669 !important;
+}

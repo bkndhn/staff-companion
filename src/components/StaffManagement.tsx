@@ -641,8 +641,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <Archive className="text-red-400" size={20} />
               Archive Staff Member
@@ -836,8 +836,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
 
       {/* Location Manager Modal */}
       {showLocationManager && (
-        <div className="modal-overlay">
-          <div className="modal-content max-w-md">
+        <div className="modal-overlay" onClick={() => setShowLocationManager(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
                 <MapPin className="text-purple-400" size={18} />
@@ -920,8 +920,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
 
       {/* Salary Category Manager Modal */}
       {showCategoryManager && (
-        <div className="modal-overlay">
-          <div className="modal-content max-w-md">
+        <div className="modal-overlay" onClick={() => setShowCategoryManager(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
                 <DollarSign className="text-emerald-400" size={18} />
@@ -1016,8 +1016,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
 
       {/* Confirmation Dialog */}
       {confirmDialog && (
-        <div className="modal-overlay">
-          <div className="modal-content max-w-sm">
+        <div className="modal-overlay" onClick={() => setConfirmDialog(null)}>
+          <div className="modal-content max-w-sm" onClick={(e) => e.stopPropagation()}>
             <div className="text-center mb-4">
               <div className={`w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center ${confirmDialog.action === 'restore' ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
                 {confirmDialog.action === 'restore' ? (
@@ -1095,8 +1095,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
 
       {/* Credentials Modal */}
       {credentialsModal && (
-        <div className="modal-overlay">
-          <div className="modal-content max-w-md">
+        <div className="modal-overlay" onClick={() => setCredentialsModal(null)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
             <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center">
                 <Check className="text-white" size={32} />

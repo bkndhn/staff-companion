@@ -76,8 +76,8 @@ const SalaryHikeDueModal: React.FC<SalaryHikeDueModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[80vh] overflow-hidden">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4 flex items-center justify-between">
                     <h3 className="text-lg font-bold flex items-center gap-2">
                         <TrendingUp size={20} />
