@@ -21,11 +21,15 @@ interface StaffPortalProps {
 }
 
 const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHikes, advances, allStaff }) => {
-  const [activeSection, setActiveSection] = useState<'overview' | 'attendance' | 'salary' | 'hikes'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'attendance' | 'salary' | 'hikes' | 'leave'>('overview');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [overrides, setOverrides] = useState<SalaryOverride | null>(null);
   const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
+  const [leaveForm, setLeaveForm] = useState({ leaveDate: '', leaveEndDate: '', leaveType: 'casual' as const, reason: '' });
+  const [leaveSubmitting, setLeaveSubmitting] = useState(false);
 
   const monthName = new Date(selectedYear, selectedMonth).toLocaleString('default', { month: 'long' });
 
