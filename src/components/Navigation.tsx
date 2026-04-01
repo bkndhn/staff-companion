@@ -49,6 +49,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, user, 
         { id: 'Attendance' as NavigationTab, label: 'Attendance', icon: Calendar },
         { id: 'Salary Management' as NavigationTab, label: 'Salary', icon: DollarSign },
         { id: 'Part-Time Staff' as NavigationTab, label: 'Part-Time', icon: Clock },
+        { id: 'Leave Management' as NavigationTab, label: 'Leave', icon: FileText },
         { id: 'Old Staff Records' as NavigationTab, label: 'Archive', icon: Archive },
         { id: 'Settings' as NavigationTab, label: 'Settings', icon: SettingsIcon },
       ];
@@ -58,6 +59,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, user, 
         { id: 'Dashboard' as NavigationTab, label: 'Dashboard', icon: BarChart3 },
         { id: 'Attendance' as NavigationTab, label: 'Attendance', icon: Calendar },
         { id: 'Part-Time Staff' as NavigationTab, label: 'Part-Time', icon: Clock },
+        { id: 'Leave Management' as NavigationTab, label: 'Leave', icon: FileText },
       ];
     }
   };
