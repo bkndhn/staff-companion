@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   User, Calendar, DollarSign, TrendingUp, Download, ChevronLeft, ChevronRight,
   CheckCircle, XCircle, Clock, Briefcase, MapPin, Phone, Home, IndianRupee,
-  ArrowUpRight, ArrowDownRight, FileText, CreditCard
+  ArrowUpRight, ArrowDownRight, FileText, CreditCard, Send, MessageSquare
 } from 'lucide-react';
 import { Staff, Attendance, SalaryHike, AdvanceDeduction, SalaryOverride } from '../types';
 import { calculateAttendanceMetrics, calculateSalary, getDaysInMonth, isSunday, roundToNearest10 } from '../utils/salaryCalculations';
