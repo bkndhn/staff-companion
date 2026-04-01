@@ -166,7 +166,7 @@ export interface SalaryOverride {
   salarySupplementsOverride?: Record<string, number>;
 }
 
-export type NavigationTab = 'Dashboard' | 'Staff Management' | 'Attendance' | 'Salary Management' | 'Part-Time Staff' | 'Old Staff Records' | 'Settings' | 'My Portal';
+export type NavigationTab = 'Dashboard' | 'Staff Management' | 'Attendance' | 'Salary Management' | 'Part-Time Staff' | 'Old Staff Records' | 'Settings' | 'My Portal' | 'Leave Management';
 
 // Re-export AppUser from userService
 export type { AppUser } from '../services/userService';

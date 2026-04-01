@@ -197,6 +197,57 @@ export type Database = {
         }
         Relationships: []
       }
+      leave_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          leave_date: string
+          leave_end_date: string | null
+          leave_type: string
+          location: string
+          manager_comment: string | null
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          staff_id: string
+          staff_name: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          leave_date: string
+          leave_end_date?: string | null
+          leave_type?: string
+          location: string
+          manager_comment?: string | null
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          staff_id: string
+          staff_name: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          leave_date?: string
+          leave_end_date?: string | null
+          leave_type?: string
+          location?: string
+          manager_comment?: string | null
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          staff_id?: string
+          staff_name?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           created_at: string | null

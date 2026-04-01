@@ -2,12 +2,13 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   User, Calendar, DollarSign, TrendingUp, Download, ChevronLeft, ChevronRight,
   CheckCircle, XCircle, Clock, Briefcase, MapPin, Phone, Home, IndianRupee,
-  ArrowUpRight, ArrowDownRight, FileText, CreditCard
+  ArrowUpRight, ArrowDownRight, FileText, CreditCard, Send, MessageSquare
 } from 'lucide-react';
 import { Staff, Attendance, SalaryHike, AdvanceDeduction, SalaryOverride } from '../types';
 import { calculateAttendanceMetrics, calculateSalary, getDaysInMonth, isSunday, roundToNearest10 } from '../utils/salaryCalculations';
 import { salaryOverrideService } from '../services/salaryOverrideService';
 import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
+import { leaveService, LeaveRequest } from '../services/leaveService';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -20,11 +21,15 @@ interface StaffPortalProps {
 }
 
 const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHikes, advances, allStaff }) => {
-  const [activeSection, setActiveSection] = useState<'overview' | 'attendance' | 'salary' | 'hikes'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'attendance' | 'salary' | 'hikes' | 'leave'>('overview');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [overrides, setOverrides] = useState<SalaryOverride | null>(null);
   const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
+  const [leaveForm, setLeaveForm] = useState({ leaveDate: '', leaveEndDate: '', leaveType: 'casual' as const, reason: '' });
+  const [leaveSubmitting, setLeaveSubmitting] = useState(false);
 
   const monthName = new Date(selectedYear, selectedMonth).toLocaleString('default', { month: 'long' });
 
@@ -73,6 +78,33 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
       .then(setSalaryCategories)
       .catch((err) => console.error('Error loading salary categories in staff portal:', err));
   }, []);
+
+  // Load leave requests
+  useEffect(() => {
+    leaveService.getByStaffId(staff.id)
+      .then(setLeaveRequests)
+      .catch((err) => console.error('Error loading leave requests:', err));
+  }, [staff.id]);
+
+  const handleLeaveSubmit = async () => {
+    if (!leaveForm.leaveDate || !leaveForm.reason.trim()) return;
+    setLeaveSubmitting(true);
+    const result = await leaveService.create({
+      staffId: staff.id,
+      staffName: staff.name,
+      location: staff.location,
+      leaveDate: leaveForm.leaveDate,
+      leaveEndDate: leaveForm.leaveEndDate || undefined,
+      leaveType: leaveForm.leaveType,
+      reason: leaveForm.reason.trim(),
+    });
+    if (result) {
+      setLeaveRequests(prev => [result, ...prev]);
+      setShowLeaveForm(false);
+      setLeaveForm({ leaveDate: '', leaveEndDate: '', leaveType: 'casual', reason: '' });
+    }
+    setLeaveSubmitting(false);
+  };
 
   // Attendance metrics for selected month
   const metrics = useMemo(() =>
@@ -275,6 +307,7 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
     { id: 'attendance' as const, label: 'Attendance', icon: Calendar },
     { id: 'salary' as const, label: 'Salary', icon: IndianRupee },
     { id: 'hikes' as const, label: 'Hikes', icon: TrendingUp },
+    { id: 'leave' as const, label: 'Leave', icon: FileText },
   ];
 
   return (
@@ -585,6 +618,152 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* LEAVE */}
+      {activeSection === 'leave' && (
+        <div className="space-y-4">
+          {/* Apply Leave Button */}
+          {!isLeftStaff && (
+            <button
+              onClick={() => setShowLeaveForm(true)}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-xl transition-all active:scale-[0.98]"
+            >
+              <Send size={18} /> Apply for Leave
+            </button>
+          )}
+
+          {/* Leave Form Modal */}
+          {showLeaveForm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowLeaveForm(false)}>
+              <div className="bg-[var(--bg-card)] border border-[var(--glass-border)] rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={e => e.stopPropagation()}>
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                  <FileText size={20} className="text-indigo-500" /> Apply for Leave
+                </h3>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Leave Date *</label>
+                    <input
+                      type="date"
+                      value={leaveForm.leaveDate}
+                      onChange={e => setLeaveForm(prev => ({ ...prev, leaveDate: e.target.value }))}
+                      className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">End Date (optional, for multiple days)</label>
+                    <input
+                      type="date"
+                      value={leaveForm.leaveEndDate}
+                      onChange={e => setLeaveForm(prev => ({ ...prev, leaveEndDate: e.target.value }))}
+                      min={leaveForm.leaveDate}
+                      className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Leave Type</label>
+                    <select
+                      value={leaveForm.leaveType}
+                      onChange={e => setLeaveForm(prev => ({ ...prev, leaveType: e.target.value as any }))}
+                      className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    >
+                      <option value="casual">Casual Leave</option>
+                      <option value="sick">Sick Leave</option>
+                      <option value="personal">Personal Leave</option>
+                      <option value="emergency">Emergency</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Reason *</label>
+                    <textarea
+                      value={leaveForm.reason}
+                      onChange={e => setLeaveForm(prev => ({ ...prev, reason: e.target.value }))}
+                      placeholder="Please describe the reason for your leave..."
+                      rows={3}
+                      className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--text-primary)] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-5">
+                  <button
+                    onClick={() => setShowLeaveForm(false)}
+                    className="flex-1 py-2.5 rounded-xl border border-[var(--glass-border)] text-[var(--text-secondary)] font-semibold text-sm hover:bg-[var(--glass-bg)] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleLeaveSubmit}
+                    disabled={leaveSubmitting || !leaveForm.leaveDate || !leaveForm.reason.trim()}
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-sm disabled:opacity-50 transition-all"
+                  >
+                    {leaveSubmitting ? 'Submitting...' : 'Submit'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Leave History */}
+          <div className="bg-[var(--bg-card)] border border-[var(--glass-border)] p-6 rounded-2xl shadow-[var(--shadow-soft)]">
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+              <FileText size={20} className="text-indigo-500" /> Leave History
+            </h3>
+            {leaveRequests.length === 0 ? (
+              <div className="text-center py-12">
+                <Calendar size={48} className="mx-auto text-[var(--text-muted)] mb-3 opacity-30" />
+                <p className="text-[var(--text-muted)] font-medium">No leave requests yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {leaveRequests.map(leave => {
+                  const statusStyle: Record<string, string> = {
+                    pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+                    approved: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+                    rejected: 'bg-red-500/10 text-red-600 border-red-500/20',
+                    postponed: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+                  };
+                  const typeLabels: Record<string, string> = {
+                    casual: 'Casual', sick: 'Sick', personal: 'Personal', emergency: 'Emergency', other: 'Other'
+                  };
+                  return (
+                    <div key={leave.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] p-4 rounded-xl">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <span className="text-sm font-semibold text-[var(--text-primary)]">
+                            {new Date(leave.leaveDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </span>
+                          {leave.leaveEndDate && (
+                            <span className="text-sm text-[var(--text-muted)]">
+                              {' → '}{new Date(leave.leaveEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </span>
+                          )}
+                          <span className="ml-2 text-xs text-[var(--text-muted)] bg-[var(--glass-bg)] px-2 py-0.5 rounded border border-[var(--glass-border)]">
+                            {typeLabels[leave.leaveType]}
+                          </span>
+                        </div>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full border ${statusStyle[leave.status]}`}>
+                          {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[var(--text-secondary)] mb-1">{leave.reason}</p>
+                      {leave.managerComment && (
+                        <div className="mt-2 bg-indigo-500/5 border border-indigo-500/20 rounded-lg p-2.5">
+                          <p className="text-xs text-indigo-500 flex items-center gap-1 mb-0.5">
+                            <MessageSquare size={12} /> {leave.reviewedBy}'s Response
+                          </p>
+                          <p className="text-sm text-[var(--text-primary)]">{leave.managerComment}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

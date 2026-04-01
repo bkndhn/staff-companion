@@ -21,6 +21,7 @@ const PartTimeStaff = React.lazy(() => import('./components/PartTimeStaff'));
 const OldStaffRecords = React.lazy(() => import('./components/OldStaffRecords'));
 const Settings = React.lazy(() => import('./components/Settings'));
 const StaffPortal = React.lazy(() => import('./components/StaffPortal'));
+const LeaveManagement = React.lazy(() => import('./components/LeaveManagement'));
 
 // Loading fallback for lazy-loaded components
 const ComponentLoader = () => (
@@ -847,6 +848,17 @@ function App() {
         return (
           <Suspense fallback={<ComponentLoader />}>
             <Settings userRole={user?.role || 'manager'} />
+          </Suspense>
+        );
+      case 'Leave Management':
+        if (user?.role !== 'admin' && user?.role !== 'manager') return null;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <LeaveManagement
+              userRole={user?.role as 'admin' | 'manager'}
+              userLocation={user?.location}
+              userName={user?.role === 'admin' ? 'Admin' : `${user?.location} Manager`}
+            />
           </Suspense>
         );
       default:
