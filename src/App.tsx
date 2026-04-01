@@ -850,6 +850,17 @@ function App() {
             <Settings userRole={user?.role || 'manager'} />
           </Suspense>
         );
+      case 'Leave Management':
+        if (user?.role !== 'admin' && user?.role !== 'manager') return null;
+        return (
+          <Suspense fallback={<ComponentLoader />}>
+            <LeaveManagement
+              userRole={user?.role as 'admin' | 'manager'}
+              userLocation={user?.location}
+              userName={user?.role === 'admin' ? 'Admin' : `${user?.location} Manager`}
+            />
+          </Suspense>
+        );
       default:
         return null;
     }
