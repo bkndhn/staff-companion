@@ -9,7 +9,8 @@ import {
   Archive,
   LogOut,
   AlertTriangle,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  FileText
 } from 'lucide-react';
 
 interface NavigationProps {
