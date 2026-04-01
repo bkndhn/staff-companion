@@ -8,6 +8,7 @@ import { Staff, Attendance, SalaryHike, AdvanceDeduction, SalaryOverride } from 
 import { calculateAttendanceMetrics, calculateSalary, getDaysInMonth, isSunday, roundToNearest10 } from '../utils/salaryCalculations';
 import { salaryOverrideService } from '../services/salaryOverrideService';
 import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
+import { leaveService, LeaveRequest } from '../services/leaveService';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
