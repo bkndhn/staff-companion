@@ -79,6 +79,33 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
       .catch((err) => console.error('Error loading salary categories in staff portal:', err));
   }, []);
 
+  // Load leave requests
+  useEffect(() => {
+    leaveService.getByStaffId(staff.id)
+      .then(setLeaveRequests)
+      .catch((err) => console.error('Error loading leave requests:', err));
+  }, [staff.id]);
+
+  const handleLeaveSubmit = async () => {
+    if (!leaveForm.leaveDate || !leaveForm.reason.trim()) return;
+    setLeaveSubmitting(true);
+    const result = await leaveService.create({
+      staffId: staff.id,
+      staffName: staff.name,
+      location: staff.location,
+      leaveDate: leaveForm.leaveDate,
+      leaveEndDate: leaveForm.leaveEndDate || undefined,
+      leaveType: leaveForm.leaveType,
+      reason: leaveForm.reason.trim(),
+    });
+    if (result) {
+      setLeaveRequests(prev => [result, ...prev]);
+      setShowLeaveForm(false);
+      setLeaveForm({ leaveDate: '', leaveEndDate: '', leaveType: 'casual', reason: '' });
+    }
+    setLeaveSubmitting(false);
+  };
+
   // Attendance metrics for selected month
   const metrics = useMemo(() =>
     calculateAttendanceMetrics(staff.id, attendance, selectedYear, selectedMonth),
