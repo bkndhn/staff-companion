@@ -307,9 +307,26 @@ export const calculateSalary = (
     }
   }
 
-  // Calculate supplements
-  const supplementsTotal = staff.salarySupplements ? Object.values(staff.salarySupplements).reduce((a, b) => a + b, 0) : 0;
-  const mealAllowance = staff.mealAllowance || 0;
+  // Calculate supplements with per-day mode support
+  const calcModes = staff.allowanceCalcModes || {};
+  const calcDaysForAllowance = calculationDays || 30; // fallback for per-day calc
+  
+  let supplementsTotal = 0;
+  if (staff.salarySupplements) {
+    Object.entries(staff.salarySupplements).forEach(([key, value]) => {
+      if (calcModes[key] === 'per_day') {
+        supplementsTotal += roundToNearest10((value / calcDaysForAllowance) * totalPresentDays);
+      } else {
+        supplementsTotal += value;
+      }
+    });
+  }
+  
+  // Meal allowance with per-day mode support
+  const rawMeal = staff.mealAllowance || 0;
+  const mealAllowance = calcModes['meal_allowance'] === 'per_day'
+    ? roundToNearest10((rawMeal / calcDaysForAllowance) * totalPresentDays)
+    : rawMeal;
 
   // Gross salary calculation
   const grossSalary = roundToNearest10(basicEarned + incentiveEarned + hraEarned + supplementsTotal + mealAllowance);
