@@ -1079,7 +1079,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                     </div>
                   ) : (
                     <>
-                      <span className="font-medium">{loc.name}</span>
+                      <span className="text-sm font-medium">{loc.name}</span>
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => { setEditingLocation(loc); setEditLocationValue(loc.name); }}
