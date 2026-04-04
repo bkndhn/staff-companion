@@ -40,6 +40,7 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
   const [selectedShift, setSelectedShift] = useState<'Morning' | 'Evening'>('Morning');
   const [selectedLocation, setSelectedLocation] = useState<string>('Big Shop');
   const [availableLocations, setAvailableLocations] = useState<string[]>(['Big Shop', 'Small Shop', 'Godown']);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
 
   // Load available locations from Supabase via locationService
   React.useEffect(() => {
