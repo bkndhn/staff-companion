@@ -781,9 +781,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 </label>
               </div>
             ))}
-                />
-              </div>
-            ))}
+
             <div className="md:col-span-2 lg:col-span-3 flex gap-3">
               <button type="submit" className="btn-premium px-6 py-2">{editingStaff ? 'Update Staff' : 'Add Staff'}</button>
               <button type="button" onClick={() => { resetForm(); setEditingStaff(null); setShowAddForm(false); }} className="btn-ghost px-6 py-2">Cancel</button>
