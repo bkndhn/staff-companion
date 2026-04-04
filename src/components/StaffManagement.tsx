@@ -372,6 +372,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       incentive: 10000,
       hra: 0,
       mealAllowance: 0,
+      mealAllowanceThreshold: 0,
+      staffAccommodation: '',
       joinedDate: new Date().toISOString().split('T')[0],
       salarySupplements: {},
       allowanceCalcModes: {},
