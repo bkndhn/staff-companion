@@ -450,6 +450,24 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               <span className="hidden sm:inline">Locations</span>
             </button>
             <button
+              onClick={() => setShowFloorManager(true)}
+              className="btn-premium flex items-center gap-2 px-3 py-2 text-sm"
+              style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' }}
+              title="Manage Floors"
+            >
+              <Layers size={16} />
+              <span className="hidden sm:inline">Floors</span>
+            </button>
+            <button
+              onClick={() => setShowDesignationManager(true)}
+              className="btn-premium flex items-center gap-2 px-3 py-2 text-sm"
+              style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' }}
+              title="Manage Designations"
+            >
+              <Briefcase size={16} />
+              <span className="hidden sm:inline">Designations</span>
+            </button>
+            <button
               onClick={() => setShowCategoryManager(true)}
               className="btn-premium btn-premium-success flex items-center gap-2 px-3 py-2 text-sm"
               title="Manage Salary Categories"
