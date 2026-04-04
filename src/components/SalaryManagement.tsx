@@ -797,6 +797,8 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
                     <td className="px-2 md:px-4 py-3 whitespace-nowrap font-medium text-gray-900 sticky left-0 z-10 bg-white">
                       {staffMember?.name}
                     </td>
+                    <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center text-xs text-gray-600">{staffMember?.floor || '-'}</td>
+                    <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center text-xs text-gray-600">{staffMember?.designation || '-'}</td>
                     <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center">
                       <span className="badge-premium badge-success">
                         {(detail.presentDays + detail.halfDays * 0.5).toFixed(1)}
