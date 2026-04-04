@@ -1061,7 +1061,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {locations.map(loc => (
                 <div key={loc.id} className="flex items-center justify-between p-3 glass-card-static rounded-lg">
                   {editingLocation?.id === loc.id ? (
