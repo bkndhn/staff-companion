@@ -463,6 +463,14 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
               <X size={14} />
               <span className="hidden xs:inline">All Absent</span>
             </button>
+            <button
+              onClick={() => setShowBulkUpload(true)}
+              className="flex items-center gap-1 px-2 md:px-3 py-1.5 bg-accent-primary text-white rounded-lg hover:opacity-90 transition-colors text-xs md:text-sm"
+              title="Import from CSV/Excel"
+            >
+              <Upload size={14} />
+              <span className="hidden sm:inline">Import</span>
+            </button>
           </div>
         </div>
 
