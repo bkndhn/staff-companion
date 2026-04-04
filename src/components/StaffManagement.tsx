@@ -1063,7 +1063,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
 
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {locations.map(loc => (
-                <div key={loc.id} className="flex items-center justify-between p-3 glass-card-static rounded-lg">
+                <div key={loc.id} className="flex items-center justify-between p-2.5 glass-card-static rounded-lg">
                   {editingLocation?.id === loc.id ? (
                     <div className="flex-1 flex gap-2 mr-2">
                       <input
