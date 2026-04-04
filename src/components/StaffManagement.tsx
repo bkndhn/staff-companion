@@ -109,6 +109,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     mealAllowance: 0,
     joinedDate: new Date().toISOString().split('T')[0],
     salarySupplements: {} as Record<string, number>,
+    allowanceCalcModes: {} as Record<string, 'fixed' | 'per_day'>,
     sundayPenalty: true,
     salaryCalculationDays: 30,
     contactNumber: '',
@@ -371,6 +372,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       mealAllowance: 0,
       joinedDate: new Date().toISOString().split('T')[0],
       salarySupplements: {},
+      allowanceCalcModes: {},
       sundayPenalty: true,
       salaryCalculationDays: 30,
       contactNumber: '',
@@ -401,7 +403,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
         totalSalary,
         experience,
         type: 'full-time',
-        sundayPenalty: formData.sundayPenalty
+        sundayPenalty: formData.sundayPenalty,
+        allowanceCalcModes: formData.allowanceCalcModes
       });
       setEditingStaff(null);
     } else {
@@ -434,6 +437,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       mealAllowance: member.mealAllowance || 0,
       joinedDate: member.joinedDate,
       salarySupplements: supplements,
+      allowanceCalcModes: member.allowanceCalcModes || {},
       sundayPenalty: member.sundayPenalty ?? true,
       salaryCalculationDays: member.salaryCalculationDays || 30,
       contactNumber: member.contactNumber || '',
@@ -717,6 +721,21 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 {salaryCategories.find(c => c.id === 'meal_allowance')?.name || 'Meal Allowance'}
               </label>
               <input type="number" value={formData.mealAllowance} onChange={(e) => setFormData({ ...formData, mealAllowance: Number(e.target.value) })} className="input-premium" />
+              <label className="flex items-center gap-2 mt-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.allowanceCalcModes['meal_allowance'] === 'per_day'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    allowanceCalcModes: {
+                      ...formData.allowanceCalcModes,
+                      meal_allowance: e.target.checked ? 'per_day' : 'fixed'
+                    }
+                  })}
+                  className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-white/30 bg-white/10"
+                />
+                <span className="text-xs text-white/50">Calculate per day present</span>
+              </label>
             </div>
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1">Salary Calculation Days</label>
@@ -745,8 +764,24 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                   })}
                   className="input-premium"
                 />
+                <label className="flex items-center gap-2 mt-1.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowanceCalcModes[category.id] === 'per_day'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      allowanceCalcModes: {
+                        ...formData.allowanceCalcModes,
+                        [category.id]: e.target.checked ? 'per_day' : 'fixed'
+                      }
+                    })}
+                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-white/30 bg-white/10"
+                  />
+                  <span className="text-xs text-white/50">Calculate per day present</span>
+                </label>
               </div>
             ))}
+
             <div className="md:col-span-2 lg:col-span-3 flex gap-3">
               <button type="submit" className="btn-premium px-6 py-2">{editingStaff ? 'Update Staff' : 'Add Staff'}</button>
               <button type="button" onClick={() => { resetForm(); setEditingStaff(null); setShowAddForm(false); }} className="btn-ghost px-6 py-2">Cancel</button>
