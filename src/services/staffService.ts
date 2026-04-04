@@ -161,6 +161,8 @@ export const staffService = {
       salaryCalculationDays: dbStaff.salary_calculation_days || 30,
       salarySupplements: dbStaff.salary_supplements || {},
       mealAllowance: dbStaff.meal_allowance || 0,
+      mealAllowanceThreshold: (dbStaff as any).meal_allowance_threshold || 0,
+      staffAccommodation: (dbStaff as any).staff_accommodation || '',
       allowanceCalcModes: (dbStaff as any).allowance_calc_modes || {},
       displayOrder: dbStaff.display_order,
       contactNumber: dbStaff.contact_number,
