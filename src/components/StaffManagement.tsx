@@ -436,6 +436,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       mealAllowance: member.mealAllowance || 0,
       joinedDate: member.joinedDate,
       salarySupplements: supplements,
+      allowanceCalcModes: member.allowanceCalcModes || {},
       sundayPenalty: member.sundayPenalty ?? true,
       salaryCalculationDays: member.salaryCalculationDays || 30,
       contactNumber: member.contactNumber || '',
