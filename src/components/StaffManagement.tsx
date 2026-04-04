@@ -1223,7 +1223,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               <select
                 value={newFloorLocation}
                 onChange={(e) => setNewFloorLocation(e.target.value)}
-                className="input-premium text-sm"
+                className="input-premium text-sm sm:w-[45%] sm:flex-shrink-0"
               >
                 <option value="">Select Location</option>
                 {locations.map(loc => (<option key={loc.id} value={loc.name}>{loc.name}</option>))}
@@ -1233,7 +1233,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 value={newFloor}
                 onChange={(e) => setNewFloor(e.target.value)}
                 placeholder="Floor Name"
-                className="input-premium flex-1 text-sm"
+                className="input-premium flex-1 min-w-0 text-sm sm:min-w-[120px]"
                 onKeyDown={(e) => { if (e.key === 'Enter' && newFloor.trim() && newFloorLocation) handleAddFloor(); }}
               />
               <button
