@@ -171,6 +171,8 @@ export const staffService = {
     return {
       name: staff.name,
       location: staff.location,
+      floor: (staff as any).floor || null,
+      designation: (staff as any).designation || null,
       type: staff.type,
       experience: staff.experience,
       basic_salary: staff.basicSalary,
@@ -187,6 +189,6 @@ export const staffService = {
       contact_number: staff.contactNumber,
       address: staff.address,
       photo_url: staff.photo
-    };
+    } as any;
   }
 };
