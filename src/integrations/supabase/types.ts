@@ -629,10 +629,12 @@ export type Database = {
           joined_date: string
           location: string
           meal_allowance: number | null
+          meal_allowance_threshold: number | null
           name: string
           photo_url: string | null
           salary_calculation_days: number | null
           salary_supplements: Json | null
+          staff_accommodation: string | null
           sunday_penalty: boolean | null
           total_salary: number
           type: string
@@ -656,10 +658,12 @@ export type Database = {
           joined_date: string
           location: string
           meal_allowance?: number | null
+          meal_allowance_threshold?: number | null
           name: string
           photo_url?: string | null
           salary_calculation_days?: number | null
           salary_supplements?: Json | null
+          staff_accommodation?: string | null
           sunday_penalty?: boolean | null
           total_salary: number
           type: string
@@ -683,10 +687,12 @@ export type Database = {
           joined_date?: string
           location?: string
           meal_allowance?: number | null
+          meal_allowance_threshold?: number | null
           name?: string
           photo_url?: string | null
           salary_calculation_days?: number | null
           salary_supplements?: Json | null
+          staff_accommodation?: string | null
           sunday_penalty?: boolean | null
           total_salary?: number
           type?: string
