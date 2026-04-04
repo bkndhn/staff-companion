@@ -406,6 +406,9 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
       `👤 *Name:* ${staffMember.name}\n` +
       `📅 *Month:* ${monthName} ${selectedYear}\n` +
       `📍 *Location:* ${staffMember.location}\n` +
+      (staffMember.floor ? `🏢 *Floor:* ${staffMember.floor}\n` : '') +
+      (staffMember.designation ? `💼 *Designation:* ${staffMember.designation}\n` : '') +
+      (staffMember.staffAccommodation ? `🏠 *Type:* ${staffMember.staffAccommodation === 'day_scholar' ? 'Day Scholar' : 'Accommodation Provided'}\n` : '') +
       `━━━━━━━━━━━━━━━━━━\n\n` +
       `📊 *ATTENDANCE*\n` +
       `• Present Days: ${presentDays}\n` +
