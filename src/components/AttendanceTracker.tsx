@@ -758,6 +758,19 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
           </div>
         </div>
       )}
+
+      {/* Bulk Upload Modal */}
+      {showBulkUpload && (
+        <BulkAttendanceUpload
+          staff={staff}
+          onImport={async (records) => {
+            await attendanceService.bulkUpsert(records);
+            // Trigger a page reload to refresh attendance data
+            window.location.reload();
+          }}
+          onClose={() => setShowBulkUpload(false)}
+        />
+      )}
     </div>
   );
 };
