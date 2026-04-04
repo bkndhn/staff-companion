@@ -45,18 +45,29 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   // Settings State
   const [showLocationManager, setShowLocationManager] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showFloorManager, setShowFloorManager] = useState(false);
+  const [showDesignationManager, setShowDesignationManager] = useState(false);
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
   const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>(() => salaryCategoryService.getCategoriesSync());
+  const [floors, setFloors] = useState<Floor[]>([]);
+  const [designations, setDesignations] = useState<Designation[]>([]);
   const [newLocation, setNewLocation] = useState('');
   const [newCategory, setNewCategory] = useState('');
+  const [newFloor, setNewFloor] = useState('');
+  const [newFloorLocation, setNewFloorLocation] = useState('');
+  const [newDesignation, setNewDesignation] = useState('');
   const [editingLocation, setEditingLocation] = useState<{ id: string; name: string } | null>(null);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [editingFloor, setEditingFloor] = useState<Floor | null>(null);
+  const [editingDesignation, setEditingDesignation] = useState<Designation | null>(null);
   const [editLocationValue, setEditLocationValue] = useState('');
   const [editCategoryValue, setEditCategoryValue] = useState('');
+  const [editFloorValue, setEditFloorValue] = useState('');
+  const [editDesignationValue, setEditDesignationValue] = useState('');
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
-    type: 'location' | 'category';
+    type: 'location' | 'category' | 'floor' | 'designation';
     id: string;
     name: string;
     action: 'delete' | 'restore';
