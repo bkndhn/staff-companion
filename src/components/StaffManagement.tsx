@@ -107,6 +107,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     incentive: 10000,
     hra: 0,
     mealAllowance: 0,
+    mealAllowanceThreshold: 0,
+    staffAccommodation: '' as '' | 'day_scholar' | 'accommodation',
     joinedDate: new Date().toISOString().split('T')[0],
     salarySupplements: {} as Record<string, number>,
     allowanceCalcModes: {} as Record<string, 'fixed' | 'per_day'>,
@@ -370,6 +372,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       incentive: 10000,
       hra: 0,
       mealAllowance: 0,
+      mealAllowanceThreshold: 0,
+      staffAccommodation: '',
       joinedDate: new Date().toISOString().split('T')[0],
       salarySupplements: {},
       allowanceCalcModes: {},
@@ -404,7 +408,9 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
         experience,
         type: 'full-time',
         sundayPenalty: formData.sundayPenalty,
-        allowanceCalcModes: formData.allowanceCalcModes
+        allowanceCalcModes: formData.allowanceCalcModes,
+        mealAllowanceThreshold: formData.mealAllowanceThreshold,
+        staffAccommodation: formData.staffAccommodation
       });
       setEditingStaff(null);
     } else {
@@ -435,6 +441,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       incentive: member.incentive,
       hra: member.hra,
       mealAllowance: member.mealAllowance || 0,
+      mealAllowanceThreshold: member.mealAllowanceThreshold || 0,
+      staffAccommodation: member.staffAccommodation || '',
       joinedDate: member.joinedDate,
       salarySupplements: supplements,
       allowanceCalcModes: member.allowanceCalcModes || {},
@@ -721,25 +729,53 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 {salaryCategories.find(c => c.id === 'meal_allowance')?.name || 'Meal Allowance'}
               </label>
               <input type="number" value={formData.mealAllowance} onChange={(e) => setFormData({ ...formData, mealAllowance: Number(e.target.value) })} className="input-premium" />
-              <label className="flex items-center gap-2 mt-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.allowanceCalcModes['meal_allowance'] === 'per_day'}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    allowanceCalcModes: {
-                      ...formData.allowanceCalcModes,
-                      meal_allowance: e.target.checked ? 'per_day' : 'fixed'
-                    }
-                  })}
-                  className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-white/30 bg-white/10"
-                />
-                <span className="text-xs text-white/50">Calculate per day present</span>
-              </label>
+              <div className="mt-1.5 space-y-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowanceCalcModes['meal_allowance'] === 'per_day'}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      allowanceCalcModes: {
+                        ...formData.allowanceCalcModes,
+                        meal_allowance: e.target.checked ? 'per_day' : 'fixed'
+                      }
+                    })}
+                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-white/30 bg-white/10"
+                  />
+                  <span className="text-xs text-white/50">Calculate per day present</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/50">Fixed if present ≥</span>
+                  <input
+                    type="number"
+                    value={formData.mealAllowanceThreshold}
+                    onChange={(e) => setFormData({ ...formData, mealAllowanceThreshold: Number(e.target.value) })}
+                    className="input-premium w-16 text-xs px-2 py-1"
+                    min="0"
+                    max="31"
+                    placeholder="0"
+                  />
+                  <span className="text-xs text-white/50">days (0=off)</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white/70 mb-1">Staff Type</label>
+              <select
+                value={formData.staffAccommodation}
+                onChange={(e) => setFormData({ ...formData, staffAccommodation: e.target.value as '' | 'day_scholar' | 'accommodation' })}
+                className="input-premium"
+              >
+                <option value="">Not Set</option>
+                <option value="day_scholar">Day Scholar</option>
+                <option value="accommodation">Accommodation Provided</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1">Salary Calculation Days</label>
-              <input type="number" value={formData.salaryCalculationDays} onChange={(e) => setFormData({ ...formData, salaryCalculationDays: Number(e.target.value) })} className="input-premium" min="1" max="31" />
+              <input type="number" value={formData.salaryCalculationDays} onChange={(e) => setFormData({ ...formData, salaryCalculationDays: Number(e.target.value) })} className="input-premium" min="0" max="31" />
+              <p className="text-xs text-white/40 mt-0.5">0 = Fixed salary</p>
             </div>
             <div className="flex items-center h-full pt-6">
               <label className="flex items-center gap-2 cursor-pointer">

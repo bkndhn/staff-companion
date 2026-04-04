@@ -322,11 +322,25 @@ export const calculateSalary = (
     });
   }
   
-  // Meal allowance with per-day mode support
+  // Meal allowance with threshold-based logic
+  // If threshold > 0: present >= threshold → fixed amount, else per-day calc
+  // If threshold = 0: check calcMode (fixed or per_day)
   const rawMeal = staff.mealAllowance || 0;
-  const mealAllowance = calcModes['meal_allowance'] === 'per_day'
-    ? roundToNearest10((rawMeal / calcDaysForAllowance) * totalPresentDays)
-    : rawMeal;
+  const mealThreshold = staff.mealAllowanceThreshold || 0;
+  let mealAllowance: number;
+  
+  if (mealThreshold > 0) {
+    // Threshold mode: fixed if present >= threshold, else per-day
+    if (totalPresentDays >= mealThreshold) {
+      mealAllowance = rawMeal;
+    } else {
+      mealAllowance = roundToNearest10((rawMeal / calcDaysForAllowance) * totalPresentDays);
+    }
+  } else if (calcModes['meal_allowance'] === 'per_day') {
+    mealAllowance = roundToNearest10((rawMeal / calcDaysForAllowance) * totalPresentDays);
+  } else {
+    mealAllowance = rawMeal;
+  }
 
   // Gross salary calculation
   const grossSalary = roundToNearest10(basicEarned + incentiveEarned + hraEarned + supplementsTotal + mealAllowance);

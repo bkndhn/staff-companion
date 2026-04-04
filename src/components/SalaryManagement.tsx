@@ -406,6 +406,9 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
       `👤 *Name:* ${staffMember.name}\n` +
       `📅 *Month:* ${monthName} ${selectedYear}\n` +
       `📍 *Location:* ${staffMember.location}\n` +
+      (staffMember.floor ? `🏢 *Floor:* ${staffMember.floor}\n` : '') +
+      (staffMember.designation ? `💼 *Designation:* ${staffMember.designation}\n` : '') +
+      (staffMember.staffAccommodation ? `🏠 *Type:* ${staffMember.staffAccommodation === 'day_scholar' ? 'Day Scholar' : 'Accommodation Provided'}\n` : '') +
       `━━━━━━━━━━━━━━━━━━\n\n` +
       `📊 *ATTENDANCE*\n` +
       `• Present Days: ${presentDays}\n` +
@@ -766,6 +769,8 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
               <tr>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10 bg-gray-50">Name</th>
+                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Floor</th>
+                <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Present</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Leave</th>
                 <th className="px-2 md:px-4 py-3 md:py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Sun Abs</th>
@@ -795,6 +800,8 @@ const SalaryManagement: React.FC<SalaryManagementProps> = ({
                     <td className="px-2 md:px-4 py-3 whitespace-nowrap font-medium text-gray-900 sticky left-0 z-10 bg-white">
                       {staffMember?.name}
                     </td>
+                    <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center text-xs text-gray-600">{staffMember?.floor || '-'}</td>
+                    <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center text-xs text-gray-600">{staffMember?.designation || '-'}</td>
                     <td className="px-2 md:px-4 py-3 whitespace-nowrap text-center">
                       <span className="badge-premium badge-success">
                         {(detail.presentDays + detail.halfDays * 0.5).toFixed(1)}

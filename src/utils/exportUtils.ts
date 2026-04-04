@@ -528,7 +528,13 @@ const renderCompactSalarySlip = (
   doc.setFont('helvetica', 'bold');
   doc.text(`${staffMember.name}`, leftMargin, y);
   doc.setFont('helvetica', 'normal');
-  doc.text(`(${staffMember.location})`, leftMargin + doc.getTextWidth(staffMember.name) + 3, y);
+  const nameWidth = doc.getTextWidth(staffMember.name);
+  let infoLine = `(${staffMember.location}`;
+  if (staffMember.floor) infoLine += ` | ${staffMember.floor}`;
+  if (staffMember.designation) infoLine += ` | ${staffMember.designation}`;
+  if (staffMember.staffAccommodation) infoLine += ` | ${staffMember.staffAccommodation === 'day_scholar' ? 'Day Scholar' : 'Accommodation'}`;
+  infoLine += ')';
+  doc.text(infoLine, leftMargin + nameWidth + 3, y);
 
   // Attendance on same line
   doc.text(`P: ${salaryDetail.presentDays}  H: ${salaryDetail.halfDays}  L: ${salaryDetail.leaveDays}  SA: ${salaryDetail.sundayAbsents}`, rightHalf, y);

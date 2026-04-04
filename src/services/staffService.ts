@@ -69,6 +69,8 @@ export const staffService = {
     if (updates.displayOrder !== undefined) (dbUpdates as any).display_order = updates.displayOrder;
     if (updates.salarySupplements !== undefined) (dbUpdates as any).salary_supplements = updates.salarySupplements;
     if (updates.mealAllowance !== undefined) (dbUpdates as any).meal_allowance = updates.mealAllowance;
+    if (updates.mealAllowanceThreshold !== undefined) (dbUpdates as any).meal_allowance_threshold = updates.mealAllowanceThreshold;
+    if (updates.staffAccommodation !== undefined) (dbUpdates as any).staff_accommodation = updates.staffAccommodation;
     if (updates.allowanceCalcModes !== undefined) (dbUpdates as any).allowance_calc_modes = updates.allowanceCalcModes;
     if (updates.contactNumber !== undefined) (dbUpdates as any).contact_number = updates.contactNumber;
     if (updates.address !== undefined) (dbUpdates as any).address = updates.address;
@@ -161,6 +163,8 @@ export const staffService = {
       salaryCalculationDays: dbStaff.salary_calculation_days || 30,
       salarySupplements: dbStaff.salary_supplements || {},
       mealAllowance: dbStaff.meal_allowance || 0,
+      mealAllowanceThreshold: (dbStaff as any).meal_allowance_threshold || 0,
+      staffAccommodation: (dbStaff as any).staff_accommodation || '',
       allowanceCalcModes: (dbStaff as any).allowance_calc_modes || {},
       displayOrder: dbStaff.display_order,
       contactNumber: dbStaff.contact_number,
@@ -187,6 +191,8 @@ export const staffService = {
       salary_calculation_days: staff.salaryCalculationDays || 30,
       salary_supplements: staff.salarySupplements || {},
       meal_allowance: staff.mealAllowance || 0,
+      meal_allowance_threshold: staff.mealAllowanceThreshold || 0,
+      staff_accommodation: staff.staffAccommodation || '',
       allowance_calc_modes: staff.allowanceCalcModes || {},
       display_order: staff.displayOrder || 0,
       contact_number: staff.contactNumber,

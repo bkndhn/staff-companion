@@ -395,6 +395,8 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       serialNo: index + 1,
       name: displayName,
       location: displayLocation,
+      floor: member.floor || '',
+      designation: member.designation || '',
       type: member.type,
       shift: attendanceRecord?.shift || '-',
       status: attendanceRecord?.status || 'Absent',
@@ -540,11 +542,12 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-2 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">S.No</th>
-                {/* Name Header - Sticky Left */}
                 <th className="px-3 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider sticky left-0 z-30 bg-gray-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Name</th>
                 <th className="px-2 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                 <th className="px-2 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-2 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Loc</th>
+                <th className="px-2 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Floor</th>
+                <th className="px-2 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Desg</th>
                 <th className="px-2 md:px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Shift</th>
               </tr>
             </thead>
@@ -626,6 +629,14 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                         <span className="text-xs text-orange-600">(temp)</span>
                       )}
                     </div>
+                  </td>
+                  {/* Floor Column */}
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                    {data.floor || '-'}
+                  </td>
+                  {/* Designation Column */}
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                    {data.designation || '-'}
                   </td>
                   {/* Shift Column */}
                   <td className="px-3 md:px-6 py-4 whitespace-nowrap">
