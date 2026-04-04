@@ -1032,7 +1032,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       {showLocationManager && (
         <div className="modal-overlay" onClick={() => setShowLocationManager(false)}>
           <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
                 <MapPin className="text-purple-400" size={18} />
                 Manage Locations
