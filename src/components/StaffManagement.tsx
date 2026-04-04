@@ -304,6 +304,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     setFormData({
       name: '',
       location: locations[0]?.name || 'Big Shop',
+      floor: '',
+      designation: '',
       basicSalary: 15000,
       incentive: 10000,
       hra: 0,
