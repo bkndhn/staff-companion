@@ -372,6 +372,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       mealAllowance: 0,
       joinedDate: new Date().toISOString().split('T')[0],
       salarySupplements: {},
+      allowanceCalcModes: {},
       sundayPenalty: true,
       salaryCalculationDays: 30,
       contactNumber: '',
