@@ -1032,7 +1032,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       {showLocationManager && (
         <div className="modal-overlay" onClick={() => setShowLocationManager(false)}>
           <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
                 <MapPin className="text-purple-400" size={18} />
                 Manage Locations
@@ -1042,7 +1042,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 mb-4 md:mb-6">
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
               <input
                 type="text"
                 value={newLocation}
@@ -1061,9 +1061,9 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {locations.map(loc => (
-                <div key={loc.id} className="flex items-center justify-between p-3 glass-card-static rounded-lg">
+                <div key={loc.id} className="flex items-center justify-between p-2.5 glass-card-static rounded-lg">
                   {editingLocation?.id === loc.id ? (
                     <div className="flex-1 flex gap-2 mr-2">
                       <input
@@ -1079,7 +1079,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                     </div>
                   ) : (
                     <>
-                      <span className="font-medium">{loc.name}</span>
+                      <span className="text-sm font-medium">{loc.name}</span>
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => { setEditingLocation(loc); setEditLocationValue(loc.name); }}
