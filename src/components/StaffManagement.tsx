@@ -1105,7 +1105,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               )}
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-4 flex justify-end">
               <button onClick={() => setShowLocationManager(false)} className="btn-ghost px-4 py-2">Close</button>
             </div>
           </div>
@@ -1142,7 +1142,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 Add
               </button>
             </div>
-            <div className="space-y-2 max-h-72 overflow-y-auto">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {salaryCategories.map(cat => (
                 <div key={cat.id} className={`flex items-center justify-between p-2.5 rounded-lg glass-card-static ${cat.isDeleted ? 'opacity-50' : ''}`}>
                   {editingCategory === cat.id ? (
