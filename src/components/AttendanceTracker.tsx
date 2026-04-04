@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Staff, Attendance, AttendanceFilter } from '../types';
-import { Calendar, Download, Check, X, Filter, MapPin, Clock } from 'lucide-react';
+import { Calendar, Download, Check, X, Filter, MapPin, Clock, Upload } from 'lucide-react';
 import { isSunday } from '../utils/salaryCalculations';
 import { exportAttendancePDF } from '../utils/exportUtils';
+import BulkAttendanceUpload from './BulkAttendanceUpload';
+import { attendanceService } from '../services/attendanceService';
 
 interface AttendanceTrackerProps {
   staff: Staff[];
