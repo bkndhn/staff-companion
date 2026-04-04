@@ -246,7 +246,66 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     setConfirmDialog(null);
   };
 
-  // Drag and drop handlers
+  // Floor handlers
+  const handleAddFloor = async () => {
+    if (!newFloor.trim() || !newFloorLocation) return;
+    const floor = await floorService.addFloor(newFloorLocation, newFloor.trim());
+    if (floor) {
+      setFloors(prev => [...prev, floor]);
+      setNewFloor('');
+    }
+  };
+
+  const handleUpdateFloor = async (id: string) => {
+    if (!editFloorValue.trim()) return;
+    const updated = await floorService.updateFloor(id, editFloorValue.trim());
+    if (updated) {
+      setFloors(prev => prev.map(f => f.id === id ? updated : f));
+      setEditingFloor(null);
+    }
+  };
+
+  const handleDeleteFloor = (floor: Floor) => {
+    setConfirmDialog({ type: 'floor', id: floor.id, name: floor.name, action: 'delete' });
+  };
+
+  const confirmFloorDelete = async () => {
+    if (!confirmDialog || confirmDialog.type !== 'floor') return;
+    await floorService.deleteFloor(confirmDialog.id);
+    setFloors(prev => prev.filter(f => f.id !== confirmDialog.id));
+    setConfirmDialog(null);
+  };
+
+  // Designation handlers
+  const handleAddDesignation = async () => {
+    if (!newDesignation.trim()) return;
+    const desig = await designationService.addDesignation(newDesignation.trim());
+    if (desig) {
+      setDesignations(prev => [...prev, desig]);
+      setNewDesignation('');
+    }
+  };
+
+  const handleUpdateDesignation = async (id: string) => {
+    if (!editDesignationValue.trim()) return;
+    const updated = await designationService.updateDesignation(id, editDesignationValue.trim());
+    if (updated) {
+      setDesignations(prev => prev.map(d => d.id === id ? updated : d));
+      setEditingDesignation(null);
+    }
+  };
+
+  const handleDeleteDesignation = (desig: Designation) => {
+    setConfirmDialog({ type: 'designation', id: desig.id, name: desig.displayName, action: 'delete' });
+  };
+
+  const confirmDesignationDelete = async () => {
+    if (!confirmDialog || confirmDialog.type !== 'designation') return;
+    await designationService.deleteDesignation(confirmDialog.id);
+    setDesignations(prev => prev.filter(d => d.id !== confirmDialog.id));
+    setConfirmDialog(null);
+  };
+
   const handleDragStart = (e: React.DragEvent, member: Staff) => {
     setDraggedItem(member);
     e.dataTransfer.effectAllowed = 'move';
