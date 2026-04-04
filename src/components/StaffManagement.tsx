@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Staff, SalaryHike } from '../types';
-import { Users, Plus, Edit2, Trash2, Archive, Calendar, TrendingUp, MapPin, DollarSign, Check, X, GripVertical, Filter, Copy, AlertCircle, RotateCcw } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Archive, Calendar, TrendingUp, MapPin, DollarSign, Check, X, GripVertical, Filter, Copy, AlertCircle, RotateCcw, Layers, Briefcase } from 'lucide-react';
 import { calculateExperience } from '../utils/salaryCalculations';
 import SalaryHikeHistory from './SalaryHikeHistory';
 import SalaryHikeDueModal from './SalaryHikeDueModal';
 import { settingsService } from '../services/settingsService';
 import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
+import { floorService, type Floor } from '../services/floorService';
+import { designationService, type Designation } from '../services/designationService';
 
 interface StaffManagementProps {
   staff: Staff[];
