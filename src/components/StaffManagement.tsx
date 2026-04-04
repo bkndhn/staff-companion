@@ -107,6 +107,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     incentive: 10000,
     hra: 0,
     mealAllowance: 0,
+    mealAllowanceThreshold: 0,
+    staffAccommodation: '' as '' | 'day_scholar' | 'accommodation',
     joinedDate: new Date().toISOString().split('T')[0],
     salarySupplements: {} as Record<string, number>,
     allowanceCalcModes: {} as Record<string, 'fixed' | 'per_day'>,
