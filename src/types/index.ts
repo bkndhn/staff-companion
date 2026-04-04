@@ -19,6 +19,7 @@ export interface Staff {
   salaryCalculationDays?: number;
   salarySupplements?: Record<string, number>;
   mealAllowance?: number;
+  allowanceCalcModes?: Record<string, 'fixed' | 'per_day'>; // e.g. { meal_allowance: 'per_day', custom_cat_id: 'fixed' }
   displayOrder?: number;
   contactNumber?: string;
   address?: string;

@@ -613,6 +613,7 @@ export type Database = {
       staff: {
         Row: {
           address: string | null
+          allowance_calc_modes: Json | null
           basic_salary: number
           contact_number: string | null
           created_at: string | null
@@ -639,6 +640,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          allowance_calc_modes?: Json | null
           basic_salary?: number
           contact_number?: string | null
           created_at?: string | null
@@ -665,6 +667,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          allowance_calc_modes?: Json | null
           basic_salary?: number
           contact_number?: string | null
           created_at?: string | null

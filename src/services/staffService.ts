@@ -69,6 +69,7 @@ export const staffService = {
     if (updates.displayOrder !== undefined) (dbUpdates as any).display_order = updates.displayOrder;
     if (updates.salarySupplements !== undefined) (dbUpdates as any).salary_supplements = updates.salarySupplements;
     if (updates.mealAllowance !== undefined) (dbUpdates as any).meal_allowance = updates.mealAllowance;
+    if (updates.allowanceCalcModes !== undefined) (dbUpdates as any).allowance_calc_modes = updates.allowanceCalcModes;
     if (updates.contactNumber !== undefined) (dbUpdates as any).contact_number = updates.contactNumber;
     if (updates.address !== undefined) (dbUpdates as any).address = updates.address;
     if (updates.photo !== undefined) (dbUpdates as any).photo_url = updates.photo;
