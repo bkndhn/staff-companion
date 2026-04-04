@@ -821,8 +821,11 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                     <td className="px-3 py-4 text-center">
                       <span className={getLocationColor(member.location)}>{member.location}</span>
                     </td>
-                    <td className="px-3 py-4 text-sm text-blue-600 font-medium text-center">
-                      {calculateExperience(member.joinedDate)}
+                    <td className="px-3 py-4 text-sm text-center">
+                      {member.floor || <span className="text-gray-400 italic">-</span>}
+                    </td>
+                    <td className="px-3 py-4 text-sm text-center">
+                      {member.designation || <span className="text-gray-400 italic">-</span>}
                     </td>
                     <td className="px-3 py-4 text-sm text-center">₹{member.basicSalary.toLocaleString()}</td>
                     <td className="px-3 py-4 text-sm text-center">₹{member.incentive.toLocaleString()}</td>
