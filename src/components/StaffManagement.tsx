@@ -721,6 +721,21 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 {salaryCategories.find(c => c.id === 'meal_allowance')?.name || 'Meal Allowance'}
               </label>
               <input type="number" value={formData.mealAllowance} onChange={(e) => setFormData({ ...formData, mealAllowance: Number(e.target.value) })} className="input-premium" />
+              <label className="flex items-center gap-2 mt-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.allowanceCalcModes['meal_allowance'] === 'per_day'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    allowanceCalcModes: {
+                      ...formData.allowanceCalcModes,
+                      meal_allowance: e.target.checked ? 'per_day' : 'fixed'
+                    }
+                  })}
+                  className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-white/30 bg-white/10"
+                />
+                <span className="text-xs text-white/50">Calculate per day present</span>
+              </label>
             </div>
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1">Salary Calculation Days</label>
