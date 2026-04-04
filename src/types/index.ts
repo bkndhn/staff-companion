@@ -2,6 +2,8 @@ export interface Staff {
   id: string;
   name: string;
   location: string;
+  floor?: string;
+  designation?: string;
   type: 'full-time' | 'part-time';
   shift?: 'Morning' | 'Evening' | 'Both';
   ratePerDay?: number;

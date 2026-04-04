@@ -197,6 +197,66 @@ export type Database = {
         }
         Relationships: []
       }
+      designations: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          id: string
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      floors: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          location_name: string
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_name: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location_name?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       leave_requests: {
         Row: {
           created_at: string | null
@@ -556,8 +616,10 @@ export type Database = {
           basic_salary: number
           contact_number: string | null
           created_at: string | null
+          designation: string | null
           display_order: number | null
           experience: string
+          floor: string | null
           hra: number
           id: string
           incentive: number
@@ -580,8 +642,10 @@ export type Database = {
           basic_salary?: number
           contact_number?: string | null
           created_at?: string | null
+          designation?: string | null
           display_order?: number | null
           experience: string
+          floor?: string | null
           hra?: number
           id?: string
           incentive?: number
@@ -604,8 +668,10 @@ export type Database = {
           basic_salary?: number
           contact_number?: string | null
           created_at?: string | null
+          designation?: string | null
           display_order?: number | null
           experience?: string
+          floor?: string | null
           hra?: number
           id?: string
           incentive?: number

@@ -373,6 +373,8 @@ const StaffPortal: React.FC<StaffPortalProps> = ({ staff, attendance, salaryHike
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <InfoRow icon={MapPin} label="Location" value={staff.location} />
+              {staff.floor && <InfoRow icon={MapPin} label="Floor" value={staff.floor} />}
+              {staff.designation && <InfoRow icon={Briefcase} label="Designation" value={staff.designation} />}
               <InfoRow icon={Briefcase} label="Experience" value={staff.experience} />
               <InfoRow icon={Calendar} label="Joined Date" value={staff.joinedDate} />
               {staff.contactNumber && <InfoRow icon={Phone} label="Contact" value={staff.contactNumber} />}

@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Staff, SalaryHike } from '../types';
-import { Users, Plus, Edit2, Trash2, Archive, Calendar, TrendingUp, MapPin, DollarSign, Check, X, GripVertical, Filter, Copy, AlertCircle, RotateCcw } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Archive, Calendar, TrendingUp, MapPin, DollarSign, Check, X, GripVertical, Filter, Copy, AlertCircle, RotateCcw, Layers, Briefcase } from 'lucide-react';
 import { calculateExperience } from '../utils/salaryCalculations';
 import SalaryHikeHistory from './SalaryHikeHistory';
 import SalaryHikeDueModal from './SalaryHikeDueModal';
 import { settingsService } from '../services/settingsService';
 import { salaryCategoryService, type SalaryCategory } from '../services/salaryCategoryService';
+import { floorService, type Floor } from '../services/floorService';
+import { designationService, type Designation } from '../services/designationService';
 
 interface StaffManagementProps {
   staff: Staff[];
@@ -43,18 +45,29 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   // Settings State
   const [showLocationManager, setShowLocationManager] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showFloorManager, setShowFloorManager] = useState(false);
+  const [showDesignationManager, setShowDesignationManager] = useState(false);
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
   const [salaryCategories, setSalaryCategories] = useState<SalaryCategory[]>(() => salaryCategoryService.getCategoriesSync());
+  const [floors, setFloors] = useState<Floor[]>([]);
+  const [designations, setDesignations] = useState<Designation[]>([]);
   const [newLocation, setNewLocation] = useState('');
   const [newCategory, setNewCategory] = useState('');
+  const [newFloor, setNewFloor] = useState('');
+  const [newFloorLocation, setNewFloorLocation] = useState('');
+  const [newDesignation, setNewDesignation] = useState('');
   const [editingLocation, setEditingLocation] = useState<{ id: string; name: string } | null>(null);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [editingFloor, setEditingFloor] = useState<Floor | null>(null);
+  const [editingDesignation, setEditingDesignation] = useState<Designation | null>(null);
   const [editLocationValue, setEditLocationValue] = useState('');
   const [editCategoryValue, setEditCategoryValue] = useState('');
+  const [editFloorValue, setEditFloorValue] = useState('');
+  const [editDesignationValue, setEditDesignationValue] = useState('');
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
-    type: 'location' | 'category';
+    type: 'location' | 'category' | 'floor' | 'designation';
     id: string;
     name: string;
     action: 'delete' | 'restore';
@@ -71,10 +84,16 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   React.useEffect(() => {
     const fetchData = async () => {
       const { locationService } = await import('../services/locationService');
-      const locs = await locationService.getLocations();
+      const [locs, cats, flrs, desigs] = await Promise.all([
+        locationService.getLocations(),
+        salaryCategoryService.getCategories(),
+        floorService.getFloors(),
+        designationService.getDesignations(),
+      ]);
       setLocations(locs);
-      const cats = await salaryCategoryService.getCategories();
       setSalaryCategories(cats);
+      setFloors(flrs);
+      setDesignations(desigs);
     };
     fetchData();
   }, []);
@@ -82,6 +101,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     location: '',
+    floor: '',
+    designation: '',
     basicSalary: 15000,
     incentive: 10000,
     hra: 0,
@@ -225,7 +246,66 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     setConfirmDialog(null);
   };
 
-  // Drag and drop handlers
+  // Floor handlers
+  const handleAddFloor = async () => {
+    if (!newFloor.trim() || !newFloorLocation) return;
+    const floor = await floorService.addFloor(newFloorLocation, newFloor.trim());
+    if (floor) {
+      setFloors(prev => [...prev, floor]);
+      setNewFloor('');
+    }
+  };
+
+  const handleUpdateFloor = async (id: string) => {
+    if (!editFloorValue.trim()) return;
+    const updated = await floorService.updateFloor(id, editFloorValue.trim());
+    if (updated) {
+      setFloors(prev => prev.map(f => f.id === id ? updated : f));
+      setEditingFloor(null);
+    }
+  };
+
+  const handleDeleteFloor = (floor: Floor) => {
+    setConfirmDialog({ type: 'floor', id: floor.id, name: floor.name, action: 'delete' });
+  };
+
+  const confirmFloorDelete = async () => {
+    if (!confirmDialog || confirmDialog.type !== 'floor') return;
+    await floorService.deleteFloor(confirmDialog.id);
+    setFloors(prev => prev.filter(f => f.id !== confirmDialog.id));
+    setConfirmDialog(null);
+  };
+
+  // Designation handlers
+  const handleAddDesignation = async () => {
+    if (!newDesignation.trim()) return;
+    const desig = await designationService.addDesignation(newDesignation.trim());
+    if (desig) {
+      setDesignations(prev => [...prev, desig]);
+      setNewDesignation('');
+    }
+  };
+
+  const handleUpdateDesignation = async (id: string) => {
+    if (!editDesignationValue.trim()) return;
+    const updated = await designationService.updateDesignation(id, editDesignationValue.trim());
+    if (updated) {
+      setDesignations(prev => prev.map(d => d.id === id ? updated : d));
+      setEditingDesignation(null);
+    }
+  };
+
+  const handleDeleteDesignation = (desig: Designation) => {
+    setConfirmDialog({ type: 'designation', id: desig.id, name: desig.displayName, action: 'delete' });
+  };
+
+  const confirmDesignationDelete = async () => {
+    if (!confirmDialog || confirmDialog.type !== 'designation') return;
+    await designationService.deleteDesignation(confirmDialog.id);
+    setDesignations(prev => prev.filter(d => d.id !== confirmDialog.id));
+    setConfirmDialog(null);
+  };
+
   const handleDragStart = (e: React.DragEvent, member: Staff) => {
     setDraggedItem(member);
     e.dataTransfer.effectAllowed = 'move';
@@ -283,6 +363,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     setFormData({
       name: '',
       location: locations[0]?.name || 'Big Shop',
+      floor: '',
+      designation: '',
       basicSalary: 15000,
       incentive: 10000,
       hra: 0,
@@ -344,6 +426,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
     setFormData({
       name: member.name,
       location: member.location,
+      floor: member.floor || '',
+      designation: member.designation || '',
       basicSalary: member.basicSalary,
       incentive: member.incentive,
       hra: member.hra,
@@ -423,6 +507,24 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
             >
               <MapPin size={16} />
               <span className="hidden sm:inline">Locations</span>
+            </button>
+            <button
+              onClick={() => setShowFloorManager(true)}
+              className="btn-premium flex items-center gap-2 px-3 py-2 text-sm"
+              style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' }}
+              title="Manage Floors"
+            >
+              <Layers size={16} />
+              <span className="hidden sm:inline">Floors</span>
+            </button>
+            <button
+              onClick={() => setShowDesignationManager(true)}
+              className="btn-premium flex items-center gap-2 px-3 py-2 text-sm"
+              style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' }}
+              title="Manage Designations"
+            >
+              <Briefcase size={16} />
+              <span className="hidden sm:inline">Designations</span>
             </button>
             <button
               onClick={() => setShowCategoryManager(true)}
@@ -537,6 +639,20 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               <label className="block text-sm font-medium text-white/70 mb-1">Location</label>
               <select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="input-premium">
                 {locations.map(loc => (<option key={loc.id} value={loc.name}>{loc.name}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white/70 mb-1">Floor</label>
+              <select value={formData.floor} onChange={(e) => setFormData({ ...formData, floor: e.target.value })} className="input-premium">
+                <option value="">No Floor</option>
+                {floors.filter(f => f.locationName === formData.location).map(f => (<option key={f.id} value={f.name}>{f.name}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white/70 mb-1">Designation</label>
+              <select value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} className="input-premium">
+                <option value="">No Designation</option>
+                {designations.map(d => (<option key={d.id} value={d.displayName}>{d.displayName}</option>))}
               </select>
             </div>
             <div>
@@ -709,6 +825,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 <th className="text-center">S.No</th>
                 <th className="sticky left-0">Name</th>
                 <th className="text-center">Location</th>
+                <th className="text-center">Floor</th>
+                <th className="text-center">Designation</th>
                 <th className="text-center">Experience</th>
                 <th className="text-center">{salaryCategories.find(c => c.id === 'basic')?.name || 'Basic'}</th>
                 <th className="text-center">{salaryCategories.find(c => c.id === 'incentive')?.name || 'Incentive'}</th>
@@ -763,10 +881,15 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                     <td className="px-3 py-4 text-center">
                       <span className={getLocationColor(member.location)}>{member.location}</span>
                     </td>
+                    <td className="px-3 py-4 text-sm text-center">
+                      {member.floor || <span className="text-gray-400 italic">-</span>}
+                    </td>
+                    <td className="px-3 py-4 text-sm text-center">
+                      {member.designation || <span className="text-gray-400 italic">-</span>}
+                    </td>
                     <td className="px-3 py-4 text-sm text-blue-600 font-medium text-center">
                       {calculateExperience(member.joinedDate)}
                     </td>
-                    <td className="px-3 py-4 text-sm text-center">₹{member.basicSalary.toLocaleString()}</td>
                     <td className="px-3 py-4 text-sm text-center">₹{member.incentive.toLocaleString()}</td>
                     <td className="px-3 py-4 text-sm text-center">₹{member.hra.toLocaleString()}</td>
                     <td className="px-3 py-4 text-sm text-center">₹{(member.mealAllowance || 0).toLocaleString()}</td>
@@ -1014,6 +1137,141 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
         </div>
       )}
 
+      {/* Floor Manager Modal */}
+      {showFloorManager && (
+        <div className="modal-overlay" onClick={() => setShowFloorManager(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
+                <Layers className="text-cyan-400" size={18} />
+                Manage Floors
+              </h3>
+              <button onClick={() => setShowFloorManager(false)} className="text-white/50 hover:text-white p-1"><X size={20} /></button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              <select
+                value={newFloorLocation}
+                onChange={(e) => setNewFloorLocation(e.target.value)}
+                className="input-premium text-sm"
+              >
+                <option value="">Select Location</option>
+                {locations.map(loc => (<option key={loc.id} value={loc.name}>{loc.name}</option>))}
+              </select>
+              <input
+                type="text"
+                value={newFloor}
+                onChange={(e) => setNewFloor(e.target.value)}
+                placeholder="Floor Name"
+                className="input-premium flex-1 text-sm"
+                onKeyDown={(e) => { if (e.key === 'Enter' && newFloor.trim() && newFloorLocation) handleAddFloor(); }}
+              />
+              <button
+                onClick={handleAddFloor}
+                disabled={!newFloor.trim() || !newFloorLocation}
+                className="btn-premium px-4 py-2 text-sm disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' }}
+              >
+                Add
+              </button>
+            </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {locations.map(loc => {
+                const locFloors = floors.filter(f => f.locationName === loc.name);
+                if (locFloors.length === 0) return null;
+                return (
+                  <div key={loc.id}>
+                    <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wide mb-1">{loc.name}</h4>
+                    {locFloors.map(floor => (
+                      <div key={floor.id} className="flex items-center justify-between p-2.5 glass-card-static rounded-lg mb-1">
+                        {editingFloor?.id === floor.id ? (
+                          <div className="flex-1 flex gap-2 mr-2">
+                            <input type="text" value={editFloorValue} onChange={(e) => setEditFloorValue(e.target.value)} className="input-premium flex-1 text-sm py-1" autoFocus
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateFloor(floor.id); if (e.key === 'Escape') setEditingFloor(null); }} />
+                            <button onClick={() => handleUpdateFloor(floor.id)} className="p-1 text-emerald-400"><Check size={16} /></button>
+                            <button onClick={() => setEditingFloor(null)} className="p-1 text-red-400"><X size={16} /></button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-sm font-medium">{floor.name}</span>
+                            <div className="flex gap-1">
+                              <button onClick={() => { setEditingFloor(floor); setEditFloorValue(floor.name); }} className="p-1 text-blue-400 hover:bg-white/10 rounded-lg"><Edit2 size={14} /></button>
+                              <button onClick={() => handleDeleteFloor(floor)} className="p-1 text-red-400 hover:bg-white/10 rounded-lg"><Trash2 size={14} /></button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+              {floors.length === 0 && <p className="text-center text-white/50 py-4">No floors added yet</p>}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button onClick={() => setShowFloorManager(false)} className="btn-ghost px-4 py-2">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Designation Manager Modal */}
+      {showDesignationManager && (
+        <div className="modal-overlay" onClick={() => setShowDesignationManager(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
+                <Briefcase className="text-amber-400" size={18} />
+                Manage Designations
+              </h3>
+              <button onClick={() => setShowDesignationManager(false)} className="text-white/50 hover:text-white p-1"><X size={20} /></button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              <input
+                type="text"
+                value={newDesignation}
+                onChange={(e) => setNewDesignation(e.target.value)}
+                placeholder="New Designation"
+                className="input-premium flex-1 text-sm"
+                onKeyDown={(e) => { if (e.key === 'Enter' && newDesignation.trim()) handleAddDesignation(); }}
+              />
+              <button
+                onClick={handleAddDesignation}
+                disabled={!newDesignation.trim()}
+                className="btn-premium px-4 py-2 text-sm disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' }}
+              >
+                Add
+              </button>
+            </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {designations.map(desig => (
+                <div key={desig.id} className="flex items-center justify-between p-2.5 glass-card-static rounded-lg">
+                  {editingDesignation?.id === desig.id ? (
+                    <div className="flex-1 flex gap-2 mr-2">
+                      <input type="text" value={editDesignationValue} onChange={(e) => setEditDesignationValue(e.target.value)} className="input-premium flex-1 text-sm py-1" autoFocus
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateDesignation(desig.id); if (e.key === 'Escape') setEditingDesignation(null); }} />
+                      <button onClick={() => handleUpdateDesignation(desig.id)} className="p-1 text-emerald-400"><Check size={16} /></button>
+                      <button onClick={() => setEditingDesignation(null)} className="p-1 text-red-400"><X size={16} /></button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-sm font-medium">{desig.displayName}</span>
+                      <div className="flex gap-1">
+                        <button onClick={() => { setEditingDesignation(desig); setEditDesignationValue(desig.displayName); }} className="p-1 text-blue-400 hover:bg-white/10 rounded-lg"><Edit2 size={14} /></button>
+                        <button onClick={() => handleDeleteDesignation(desig)} className="p-1 text-red-400 hover:bg-white/10 rounded-lg"><Trash2 size={14} /></button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+              {designations.length === 0 && <p className="text-center text-white/50 py-4">No designations added yet</p>}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button onClick={() => setShowDesignationManager(false)} className="btn-ghost px-4 py-2">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Dialog */}
       {confirmDialog && (
         <div className="modal-overlay" onClick={() => setConfirmDialog(null)}>
@@ -1027,7 +1285,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 )}
               </div>
               <h3 className="text-lg font-bold text-white">
-                {confirmDialog.action === 'restore' ? 'Restore' : 'Delete'} {confirmDialog.type === 'location' ? 'Location' : 'Category'}?
+                {confirmDialog.action === 'restore' ? 'Restore' : 'Delete'} {confirmDialog.type === 'location' ? 'Location' : confirmDialog.type === 'floor' ? 'Floor' : confirmDialog.type === 'designation' ? 'Designation' : 'Category'}?
               </h3>
             </div>
             <p className="text-white/60 text-sm text-center mb-6">
@@ -1045,6 +1303,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               <button
                 onClick={() => {
                   if (confirmDialog.type === 'location') confirmLocationDelete();
+                  else if (confirmDialog.type === 'floor') confirmFloorDelete();
+                  else if (confirmDialog.type === 'designation') confirmDesignationDelete();
                   else confirmCategoryAction();
                 }}
                 className={`flex-1 ${confirmDialog.action === 'restore' ? 'btn-premium btn-premium-success' : 'btn-premium btn-premium-danger'}`}

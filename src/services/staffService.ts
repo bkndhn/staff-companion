@@ -54,6 +54,8 @@ export const staffService = {
 
     if (updates.name !== undefined) (dbUpdates as any).name = updates.name;
     if (updates.location !== undefined) (dbUpdates as any).location = updates.location;
+    if (updates.floor !== undefined) (dbUpdates as any).floor = updates.floor;
+    if (updates.designation !== undefined) (dbUpdates as any).designation = updates.designation;
     if (updates.type !== undefined) (dbUpdates as any).type = updates.type;
     if (updates.experience !== undefined) (dbUpdates as any).experience = updates.experience;
     if (updates.basicSalary !== undefined) (dbUpdates as any).basic_salary = updates.basicSalary;
@@ -144,6 +146,8 @@ export const staffService = {
       id: dbStaff.id,
       name: dbStaff.name,
       location: dbStaff.location,
+      floor: (dbStaff as any).floor || undefined,
+      designation: (dbStaff as any).designation || undefined,
       type: dbStaff.type as Staff['type'],
       experience: dbStaff.experience,
       basicSalary: dbStaff.basic_salary,
@@ -167,6 +171,8 @@ export const staffService = {
     return {
       name: staff.name,
       location: staff.location,
+      floor: (staff as any).floor || null,
+      designation: (staff as any).designation || null,
       type: staff.type,
       experience: staff.experience,
       basic_salary: staff.basicSalary,
@@ -183,6 +189,6 @@ export const staffService = {
       contact_number: staff.contactNumber,
       address: staff.address,
       photo_url: staff.photo
-    };
+    } as any;
   }
 };
