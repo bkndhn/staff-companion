@@ -395,6 +395,8 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
       serialNo: index + 1,
       name: displayName,
       location: displayLocation,
+      floor: member.floor || '',
+      designation: member.designation || '',
       type: member.type,
       shift: attendanceRecord?.shift || '-',
       status: attendanceRecord?.status || 'Absent',
