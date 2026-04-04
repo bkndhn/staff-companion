@@ -1042,7 +1042,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 mb-4 md:mb-6">
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
               <input
                 type="text"
                 value={newLocation}
