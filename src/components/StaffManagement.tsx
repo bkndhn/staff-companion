@@ -828,7 +828,9 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                     <td className="px-3 py-4 text-sm text-center">
                       {member.designation || <span className="text-gray-400 italic">-</span>}
                     </td>
-                    <td className="px-3 py-4 text-sm text-center">₹{member.basicSalary.toLocaleString()}</td>
+                    <td className="px-3 py-4 text-sm text-blue-600 font-medium text-center">
+                      {calculateExperience(member.joinedDate)}
+                    </td>
                     <td className="px-3 py-4 text-sm text-center">₹{member.incentive.toLocaleString()}</td>
                     <td className="px-3 py-4 text-sm text-center">₹{member.hra.toLocaleString()}</td>
                     <td className="px-3 py-4 text-sm text-center">₹{(member.mealAllowance || 0).toLocaleString()}</td>
