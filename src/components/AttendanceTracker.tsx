@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Staff, Attendance, AttendanceFilter } from '../types';
-import { Calendar, Download, Check, X, Filter, MapPin, Clock } from 'lucide-react';
+import { Calendar, Download, Check, X, Filter, MapPin, Clock, Upload } from 'lucide-react';
 import { isSunday } from '../utils/salaryCalculations';
 import { exportAttendancePDF } from '../utils/exportUtils';
+import BulkAttendanceUpload from './BulkAttendanceUpload';
+import { attendanceService } from '../services/attendanceService';
 
 interface AttendanceTrackerProps {
   staff: Staff[];
@@ -38,6 +40,7 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
   const [selectedShift, setSelectedShift] = useState<'Morning' | 'Evening'>('Morning');
   const [selectedLocation, setSelectedLocation] = useState<string>('Big Shop');
   const [availableLocations, setAvailableLocations] = useState<string[]>(['Big Shop', 'Small Shop', 'Godown']);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
 
   // Load available locations from Supabase via locationService
   React.useEffect(() => {
@@ -460,6 +463,14 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
               <X size={14} />
               <span className="hidden xs:inline">All Absent</span>
             </button>
+            <button
+              onClick={() => setShowBulkUpload(true)}
+              className="flex items-center gap-1 px-2 md:px-3 py-1.5 bg-accent-primary text-white rounded-lg hover:opacity-90 transition-colors text-xs md:text-sm"
+              title="Import from CSV/Excel"
+            >
+              <Upload size={14} />
+              <span className="hidden sm:inline">Import</span>
+            </button>
           </div>
         </div>
 
@@ -746,6 +757,19 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Bulk Upload Modal */}
+      {showBulkUpload && (
+        <BulkAttendanceUpload
+          staff={staff}
+          onImport={async (records) => {
+            await attendanceService.bulkUpsert(records);
+            // Trigger a page reload to refresh attendance data
+            window.location.reload();
+          }}
+          onClose={() => setShowBulkUpload(false)}
+        />
       )}
     </div>
   );
