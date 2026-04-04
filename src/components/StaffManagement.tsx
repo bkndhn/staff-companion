@@ -577,6 +577,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 <option value="">No Designation</option>
                 {designations.map(d => (<option key={d.id} value={d.displayName}>{d.displayName}</option>))}
               </select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1">Joined Date</label>
               <input type="date" value={formData.joinedDate} onChange={(e) => setFormData({ ...formData, joinedDate: e.target.value })} className="input-premium" required />
