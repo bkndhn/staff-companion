@@ -19,6 +19,8 @@ export interface Staff {
   salaryCalculationDays?: number;
   salarySupplements?: Record<string, number>;
   mealAllowance?: number;
+  mealAllowanceThreshold?: number; // If present >= threshold days, fixed amount; else per-day calc. 0 = always fixed
+  staffAccommodation?: 'day_scholar' | 'accommodation' | ''; // Day scholar or shop-provided accommodation
   allowanceCalcModes?: Record<string, 'fixed' | 'per_day'>; // e.g. { meal_allowance: 'per_day', custom_cat_id: 'fixed' }
   displayOrder?: number;
   contactNumber?: string;
