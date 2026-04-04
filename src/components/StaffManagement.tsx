@@ -1105,7 +1105,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               )}
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-4 flex justify-end">
               <button onClick={() => setShowLocationManager(false)} className="btn-ghost px-4 py-2">Close</button>
             </div>
           </div>
