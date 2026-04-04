@@ -630,6 +630,14 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
                       )}
                     </div>
                   </td>
+                  {/* Floor Column */}
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                    {data.floor || '-'}
+                  </td>
+                  {/* Designation Column */}
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs text-gray-600">
+                    {data.designation || '-'}
+                  </td>
                   {/* Shift Column */}
                   <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                     {data.shift !== '-' ? (
