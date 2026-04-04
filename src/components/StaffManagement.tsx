@@ -84,10 +84,16 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   React.useEffect(() => {
     const fetchData = async () => {
       const { locationService } = await import('../services/locationService');
-      const locs = await locationService.getLocations();
+      const [locs, cats, flrs, desigs] = await Promise.all([
+        locationService.getLocations(),
+        salaryCategoryService.getCategories(),
+        floorService.getFloors(),
+        designationService.getDesignations(),
+      ]);
       setLocations(locs);
-      const cats = await salaryCategoryService.getCategories();
       setSalaryCategories(cats);
+      setFloors(flrs);
+      setDesignations(desigs);
     };
     fetchData();
   }, []);
