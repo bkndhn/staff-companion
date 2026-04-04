@@ -565,6 +565,19 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               </select>
             </div>
             <div>
+              <label className="block text-sm font-medium text-white/70 mb-1">Floor</label>
+              <select value={formData.floor} onChange={(e) => setFormData({ ...formData, floor: e.target.value })} className="input-premium">
+                <option value="">No Floor</option>
+                {floors.filter(f => f.locationName === formData.location).map(f => (<option key={f.id} value={f.name}>{f.name}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white/70 mb-1">Designation</label>
+              <select value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} className="input-premium">
+                <option value="">No Designation</option>
+                {designations.map(d => (<option key={d.id} value={d.displayName}>{d.displayName}</option>))}
+              </select>
+            <div>
               <label className="block text-sm font-medium text-white/70 mb-1">Joined Date</label>
               <input type="date" value={formData.joinedDate} onChange={(e) => setFormData({ ...formData, joinedDate: e.target.value })} className="input-premium" required />
             </div>
