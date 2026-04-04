@@ -408,7 +408,9 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
         experience,
         type: 'full-time',
         sundayPenalty: formData.sundayPenalty,
-        allowanceCalcModes: formData.allowanceCalcModes
+        allowanceCalcModes: formData.allowanceCalcModes,
+        mealAllowanceThreshold: formData.mealAllowanceThreshold,
+        staffAccommodation: formData.staffAccommodation
       });
       setEditingStaff(null);
     } else {
