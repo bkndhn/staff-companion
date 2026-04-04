@@ -356,6 +356,26 @@ body.light-theme .text-white {
   color: #1a1a2e !important;
 }
 
+/* EXCEPTION: Preserve white text on active tabs with gradient backgrounds */
+body.light-theme button[class*="from-indigo-5"][class*="text-white"],
+body.light-theme button[class*="from-emerald-5"][class*="text-white"],
+body.light-theme button[class*="from-purple-6"][class*="text-white"],
+body.light-theme button[class*="from-indigo-5"] span,
+body.light-theme button[class*="from-emerald-5"] span,
+body.light-theme button[class*="from-purple-6"] span,
+body.light-theme button[class*="from-indigo-5"] svg,
+body.light-theme button[class*="from-emerald-5"] svg,
+body.light-theme button[class*="from-purple-6"] svg {
+  color: #ffffff !important;
+}
+
+/* Active nav tabs in light mode - white text */
+body.light-theme .nav-tab-active,
+body.light-theme .nav-tab-active span,
+body.light-theme .nav-tab-active svg {
+  color: #ffffff !important;
+}
+
 body.light-theme .text-white\/80,
 body.light-theme .text-white\/90 {
   color: rgba(26, 26, 46, 0.9) !important;
