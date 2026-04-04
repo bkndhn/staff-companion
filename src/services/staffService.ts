@@ -54,6 +54,8 @@ export const staffService = {
 
     if (updates.name !== undefined) (dbUpdates as any).name = updates.name;
     if (updates.location !== undefined) (dbUpdates as any).location = updates.location;
+    if (updates.floor !== undefined) (dbUpdates as any).floor = updates.floor;
+    if (updates.designation !== undefined) (dbUpdates as any).designation = updates.designation;
     if (updates.type !== undefined) (dbUpdates as any).type = updates.type;
     if (updates.experience !== undefined) (dbUpdates as any).experience = updates.experience;
     if (updates.basicSalary !== undefined) (dbUpdates as any).basic_salary = updates.basicSalary;
