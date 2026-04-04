@@ -768,6 +768,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 <th className="text-center">Location</th>
                 <th className="text-center">Floor</th>
                 <th className="text-center">Designation</th>
+                <th className="text-center">Experience</th>
                 <th className="text-center">{salaryCategories.find(c => c.id === 'basic')?.name || 'Basic'}</th>
                 <th className="text-center">{salaryCategories.find(c => c.id === 'incentive')?.name || 'Incentive'}</th>
                 <th className="text-center">{salaryCategories.find(c => c.id === 'hra')?.name || 'HRA'}</th>
