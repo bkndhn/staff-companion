@@ -101,6 +101,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     location: '',
+    floor: '',
+    designation: '',
     basicSalary: 15000,
     incentive: 10000,
     hra: 0,
