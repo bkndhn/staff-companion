@@ -439,6 +439,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
       incentive: member.incentive,
       hra: member.hra,
       mealAllowance: member.mealAllowance || 0,
+      mealAllowanceThreshold: member.mealAllowanceThreshold || 0,
+      staffAccommodation: member.staffAccommodation || '',
       joinedDate: member.joinedDate,
       salarySupplements: supplements,
       allowanceCalcModes: member.allowanceCalcModes || {},
