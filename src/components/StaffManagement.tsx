@@ -1137,6 +1137,141 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
         </div>
       )}
 
+      {/* Floor Manager Modal */}
+      {showFloorManager && (
+        <div className="modal-overlay" onClick={() => setShowFloorManager(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
+                <Layers className="text-cyan-400" size={18} />
+                Manage Floors
+              </h3>
+              <button onClick={() => setShowFloorManager(false)} className="text-white/50 hover:text-white p-1"><X size={20} /></button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              <select
+                value={newFloorLocation}
+                onChange={(e) => setNewFloorLocation(e.target.value)}
+                className="input-premium text-sm"
+              >
+                <option value="">Select Location</option>
+                {locations.map(loc => (<option key={loc.id} value={loc.name}>{loc.name}</option>))}
+              </select>
+              <input
+                type="text"
+                value={newFloor}
+                onChange={(e) => setNewFloor(e.target.value)}
+                placeholder="Floor Name"
+                className="input-premium flex-1 text-sm"
+                onKeyDown={(e) => { if (e.key === 'Enter' && newFloor.trim() && newFloorLocation) handleAddFloor(); }}
+              />
+              <button
+                onClick={handleAddFloor}
+                disabled={!newFloor.trim() || !newFloorLocation}
+                className="btn-premium px-4 py-2 text-sm disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' }}
+              >
+                Add
+              </button>
+            </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {locations.map(loc => {
+                const locFloors = floors.filter(f => f.locationName === loc.name);
+                if (locFloors.length === 0) return null;
+                return (
+                  <div key={loc.id}>
+                    <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wide mb-1">{loc.name}</h4>
+                    {locFloors.map(floor => (
+                      <div key={floor.id} className="flex items-center justify-between p-2.5 glass-card-static rounded-lg mb-1">
+                        {editingFloor?.id === floor.id ? (
+                          <div className="flex-1 flex gap-2 mr-2">
+                            <input type="text" value={editFloorValue} onChange={(e) => setEditFloorValue(e.target.value)} className="input-premium flex-1 text-sm py-1" autoFocus
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateFloor(floor.id); if (e.key === 'Escape') setEditingFloor(null); }} />
+                            <button onClick={() => handleUpdateFloor(floor.id)} className="p-1 text-emerald-400"><Check size={16} /></button>
+                            <button onClick={() => setEditingFloor(null)} className="p-1 text-red-400"><X size={16} /></button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-sm font-medium">{floor.name}</span>
+                            <div className="flex gap-1">
+                              <button onClick={() => { setEditingFloor(floor); setEditFloorValue(floor.name); }} className="p-1 text-blue-400 hover:bg-white/10 rounded-lg"><Edit2 size={14} /></button>
+                              <button onClick={() => handleDeleteFloor(floor)} className="p-1 text-red-400 hover:bg-white/10 rounded-lg"><Trash2 size={14} /></button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+              {floors.length === 0 && <p className="text-center text-white/50 py-4">No floors added yet</p>}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button onClick={() => setShowFloorManager(false)} className="btn-ghost px-4 py-2">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Designation Manager Modal */}
+      {showDesignationManager && (
+        <div className="modal-overlay" onClick={() => setShowDesignationManager(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base md:text-lg font-bold flex items-center gap-2">
+                <Briefcase className="text-amber-400" size={18} />
+                Manage Designations
+              </h3>
+              <button onClick={() => setShowDesignationManager(false)} className="text-white/50 hover:text-white p-1"><X size={20} /></button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              <input
+                type="text"
+                value={newDesignation}
+                onChange={(e) => setNewDesignation(e.target.value)}
+                placeholder="New Designation"
+                className="input-premium flex-1 text-sm"
+                onKeyDown={(e) => { if (e.key === 'Enter' && newDesignation.trim()) handleAddDesignation(); }}
+              />
+              <button
+                onClick={handleAddDesignation}
+                disabled={!newDesignation.trim()}
+                className="btn-premium px-4 py-2 text-sm disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' }}
+              >
+                Add
+              </button>
+            </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {designations.map(desig => (
+                <div key={desig.id} className="flex items-center justify-between p-2.5 glass-card-static rounded-lg">
+                  {editingDesignation?.id === desig.id ? (
+                    <div className="flex-1 flex gap-2 mr-2">
+                      <input type="text" value={editDesignationValue} onChange={(e) => setEditDesignationValue(e.target.value)} className="input-premium flex-1 text-sm py-1" autoFocus
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateDesignation(desig.id); if (e.key === 'Escape') setEditingDesignation(null); }} />
+                      <button onClick={() => handleUpdateDesignation(desig.id)} className="p-1 text-emerald-400"><Check size={16} /></button>
+                      <button onClick={() => setEditingDesignation(null)} className="p-1 text-red-400"><X size={16} /></button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-sm font-medium">{desig.displayName}</span>
+                      <div className="flex gap-1">
+                        <button onClick={() => { setEditingDesignation(desig); setEditDesignationValue(desig.displayName); }} className="p-1 text-blue-400 hover:bg-white/10 rounded-lg"><Edit2 size={14} /></button>
+                        <button onClick={() => handleDeleteDesignation(desig)} className="p-1 text-red-400 hover:bg-white/10 rounded-lg"><Trash2 size={14} /></button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+              {designations.length === 0 && <p className="text-center text-white/50 py-4">No designations added yet</p>}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button onClick={() => setShowDesignationManager(false)} className="btn-ghost px-4 py-2">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Dialog */}
       {confirmDialog && (
         <div className="modal-overlay" onClick={() => setConfirmDialog(null)}>
@@ -1150,7 +1285,7 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
                 )}
               </div>
               <h3 className="text-lg font-bold text-white">
-                {confirmDialog.action === 'restore' ? 'Restore' : 'Delete'} {confirmDialog.type === 'location' ? 'Location' : 'Category'}?
+                {confirmDialog.action === 'restore' ? 'Restore' : 'Delete'} {confirmDialog.type === 'location' ? 'Location' : confirmDialog.type === 'floor' ? 'Floor' : confirmDialog.type === 'designation' ? 'Designation' : 'Category'}?
               </h3>
             </div>
             <p className="text-white/60 text-sm text-center mb-6">
@@ -1168,6 +1303,8 @@ const StaffManagement: React.FC<StaffManagementProps> = ({
               <button
                 onClick={() => {
                   if (confirmDialog.type === 'location') confirmLocationDelete();
+                  else if (confirmDialog.type === 'floor') confirmFloorDelete();
+                  else if (confirmDialog.type === 'designation') confirmDesignationDelete();
                   else confirmCategoryAction();
                 }}
                 className={`flex-1 ${confirmDialog.action === 'restore' ? 'btn-premium btn-premium-success' : 'btn-premium btn-premium-danger'}`}
